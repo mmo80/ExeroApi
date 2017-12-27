@@ -28,6 +28,7 @@ namespace Exero.Api
             // DI
             services.AddSingleton<IExerciseCategoryRepository, ExerciseCategoryMemoryRepository>();
             services.AddSingleton<IUserRepository, UserMemoryRepository>();
+            services.AddSingleton<IExerciseRepository, ExerciseMemoryRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

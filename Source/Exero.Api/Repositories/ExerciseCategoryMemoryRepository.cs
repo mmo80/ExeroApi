@@ -8,17 +8,11 @@ namespace Exero.Api.Repositories
 {
     public class ExerciseCategoryMemoryRepository : IExerciseCategoryRepository
     {
-        private IList<ExerciseCategory> _categories;
+        private readonly IList<ExerciseCategory> _categories;
 
         public ExerciseCategoryMemoryRepository()
         {
-            var user = new User() {Id = Guid.Parse("f93ac602-e896-47ec-b5b5-d11702c033de"), Email = "mmo_80@yahoo.se"};
-
-            _categories = new List<ExerciseCategory>()
-            {
-                new ExerciseCategory() { Id = Guid.Parse("b6a521ef-a47b-4966-ae02-cb889e8f2cc3"), Name = "Biceps", User = user},
-                new ExerciseCategory() { Id = Guid.Parse("d064b338-55e3-4d5d-a33a-10ae6711894a"), Name = "Chest" , User = user}
-            };
+            _categories = InMemoryData.Categories;
         }
 
         public Task<IEnumerable<ExerciseCategory>> GetAll(Guid userId)
@@ -44,8 +38,6 @@ namespace Exero.Api.Repositories
                 _categories.Add(exerciseCategory);
                 return exerciseCategory;
             });
-
-            //return Task.CompletedTask;
         }
 
         public Task<ExerciseCategory> Update(Guid userId, Guid id, string name, string note)
