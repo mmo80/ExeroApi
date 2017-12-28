@@ -4,12 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
 using Exero.Api.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Exero.Api.Controllers
 {
-    //[Produces("application/json")]
     [Route("api/user")]
     public class ExerciseController : Controller
     {
@@ -30,10 +28,10 @@ namespace Exero.Api.Controllers
         }
 
         [HttpGet("{userid}/category/{categoryid}/exercise/{id}", Name = "GetExercise")]
-        public async Task<ExerciseApi> GetExercise(Guid userId, Guid id)
+        public async Task<ExerciseApi> GetExercise(Guid userId, Guid categoryid, Guid id)
         {
-            var category = await _exerciseRepository.Get(userId, id);
-            return new ExerciseApi { Id = category.Id, Name = category.Name, Note = category.Note };
+            var exercise = await _exerciseRepository.Get(userId, categoryid, id);
+            return new ExerciseApi { Id = exercise.Id, Name = exercise.Name, Note = exercise.Note };
         }
 
         [HttpPost("{userid}/category/{categoryid}/exercise")]
@@ -50,7 +48,7 @@ namespace Exero.Api.Controllers
             await _exerciseRepository.Add(exercise);
 
             return CreatedAtRoute("GetExercise",
-                new { Controller = "Exercise", userId, id = exercise.Id },
+                new { Controller = "Exercise", userId, categoryId, id = exercise.Id },
                 new ExerciseApi { Id = exercise.Id, Name = exercise.Name, Note = exercise.Note });
         }
     }

@@ -23,7 +23,7 @@ namespace Exero.Api.Repositories
             });
         }
 
-        public Task<Exercise> Get(Guid userId, Guid id)
+        public Task<Exercise> Get(Guid userId, Guid categoryId, Guid id)
         {
             return Task.Run(() =>
             {
