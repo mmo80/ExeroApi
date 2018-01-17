@@ -2,11 +2,9 @@
 
 namespace Exero.Api.Models
 {
-    public class Exercise : BaseId
+    public class ExerciseGroup : BaseId
     {
         public string Name { get; set; }
         public string Note { get; set; }
-        // ImageUrl
-        // VideoUrl
     }
 }

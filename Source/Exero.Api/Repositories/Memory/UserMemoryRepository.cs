@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
 
-namespace Exero.Api.Repositories
+namespace Exero.Api.Repositories.Memory
 {
     public class UserMemoryRepository : IUserRepository
     {

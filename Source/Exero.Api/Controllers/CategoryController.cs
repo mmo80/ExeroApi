@@ -9,15 +9,15 @@ using Microsoft.AspNetCore.Mvc;
 namespace Exero.Api.Controllers
 {
     [Route("api/user")]
-    public class ExerciseCategoryController : Controller
+    public class CategoryController : Controller
     {
-        private readonly IExerciseCategoryRepository _categoryRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        //private readonly IUserRepository _userRepository;
 
-        public ExerciseCategoryController(IExerciseCategoryRepository categoryRepository, IUserRepository userRepository)
+        public CategoryController(ICategoryRepository categoryRepository) // , IUserRepository userRepository
         {
             _categoryRepository = categoryRepository;
-            _userRepository = userRepository;
+            //_userRepository = userRepository;
         }
 
         [HttpGet("{userid}/category")]
@@ -37,18 +37,18 @@ namespace Exero.Api.Controllers
         [HttpPost("{userid}/category")]
         public async Task<IActionResult> Post(Guid userId, [FromBody]CategoryUpdateApi categoryUpdate)
         {
-            var user = await _userRepository.Get(userId);
-            var category = new ExerciseCategory()
+            //var user = await _userRepository.Get(userId);
+            var category = new Category()
             {
                 Id = Guid.NewGuid(),
                 Name = categoryUpdate.Name,
                 Note = categoryUpdate.Note,
-                User = user
+                //User = user
             };
             await _categoryRepository.Add(category);
 
             return CreatedAtRoute("GetCategory", 
-                new { Controller = "ExerciseCategory", userId, id = category.Id }, 
+                new { Controller = "Category", userId, id = category.Id }, 
                 new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note });
         }
 

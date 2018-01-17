@@ -4,34 +4,35 @@ using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
 
-namespace Exero.Api.Repositories
+namespace Exero.Api.Repositories.Memory
 {
-    public class ExerciseCategoryMemoryRepository : IExerciseCategoryRepository
+    public class CategoryMemoryRepository : ICategoryRepository
     {
-        private readonly IList<ExerciseCategory> _categories;
+        private readonly IList<Category> _categories;
 
-        public ExerciseCategoryMemoryRepository()
+        public CategoryMemoryRepository()
         {
             _categories = InMemoryData.Categories;
         }
 
-        public Task<IEnumerable<ExerciseCategory>> GetAll(Guid userId)
+        public Task<IEnumerable<Category>> GetAll(Guid userId)
         {
+            //return _categories.AsEnumerable();
             return Task.Run(() =>
             {
-                return _categories.Where(x => x.User.Id == userId);
+                return _categories.AsEnumerable();//.Where(x => x.User.Id == userId);
             });
         }
 
-        public Task<ExerciseCategory> Get(Guid userId, Guid id)
+        public Task<Category> Get(Guid userId, Guid id)
         {
             return Task.Run(() =>
             {
-                return _categories.First(c => c.Id == id && c.User.Id == userId);
+                return _categories.First(c => c.Id == id); //  && c.User.Id == userId
             });
         }
 
-        public Task<ExerciseCategory> Add(ExerciseCategory exerciseCategory)
+        public Task<Category> Add(Category exerciseCategory)
         {
             return Task.Run(() =>
             {
@@ -40,11 +41,11 @@ namespace Exero.Api.Repositories
             });
         }
 
-        public Task<ExerciseCategory> Update(Guid userId, Guid id, string name, string note)
+        public Task<Category> Update(Guid userId, Guid id, string name, string note)
         {
             return Task.Run(() =>
             {
-                var category = _categories.First(c => c.Id == id && c.User.Id == userId);
+                var category = _categories.First(c => c.Id == id); //  && c.User.Id == userId
                 if (!string.IsNullOrEmpty(name)) { category.Name = name; }
                 if (!string.IsNullOrEmpty(note)) { category.Note = note; }
                 return category;
@@ -53,7 +54,7 @@ namespace Exero.Api.Repositories
 
         public Task Remove(Guid userId, Guid id)
         {
-            var category = _categories.First(c => c.Id == id && c.User.Id == userId);
+            var category = _categories.First(c => c.Id == id); //  && c.User.Id == userId
             _categories.Remove(category);
 
             return Task.CompletedTask;
