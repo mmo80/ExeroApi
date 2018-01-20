@@ -1,6 +1,4 @@
-﻿using System;
-using Exero.Api.Models;
-using Exero.Api.Repositories;
+﻿using Exero.Api.Repositories;
 using Exero.Api.Repositories.Memory;
 using Exero.Api.Repositories.Neo4j;
 using Microsoft.AspNetCore.Builder;
@@ -31,17 +29,19 @@ namespace Exero.Api
                 {
                     options.Filters.Add(new RequireHttpsAttribute());
                 })
-                .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
+                .AddJsonOptions(options => options.SerializerSettings.ContractResolver = 
+                    new DefaultContractResolver());
 
             // DI
-            //var bajs = Configuration.GetSection("Neo4jSettings");
-
-
             services.Configure<ExeroSettings>(Configuration.GetSection("ExeroSettings"));
 
             services.AddSingleton<IGraphRepository, GraphRepository>();
             services.AddSingleton<ICategoryRepository, CategoryRepository>();
             services.AddSingleton<IUserRepository, UserMemoryRepository>();
+            services.AddSingleton<IExerciseGroupRepository, ExerciseGroupRepository>();
+            services.AddSingleton<IExerciseRepository, ExerciseRepository>();
+            services.AddSingleton<IWorkoutSessionRepository, WorkoutSessionRepository>();
+            services.AddSingleton<IExerciseSessionRepository, ExerciseSessionRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

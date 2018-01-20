@@ -4,10 +4,10 @@ namespace Exero.Api.Models
 {
     public class ExerciseRecord : BaseId
     {
-        public float EpochTimestamp { get; set; }
+        public double EpochTimestamp { get; set; }
         public string Set { get; set; }
         public int Reps { get; set; }
-        public float Value { get; set; }
+        public double Value { get; set; }
         public string Unit { get; set; }
         public bool DropSet { get; set; }
 

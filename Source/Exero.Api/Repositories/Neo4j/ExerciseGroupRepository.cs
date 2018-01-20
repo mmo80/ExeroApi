@@ -38,13 +38,26 @@ namespace Exero.Api.Repositories.Neo4j
             return list;
         }
 
+        public async Task<ExerciseGroup> Get(Guid id)
+        {
+            ExerciseGroup item;
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                    "MATCH (eg:ExerciseGroup) WHERE eg.id = $id RETURN eg.id, eg.name, eg.note",
+                    new { id = id.ToString() }
+                );
+                item = await GetExerciseGroup(reader);
+            }
+            return item;
+        }
+
         public async Task<ExerciseGroup> Add(ExerciseGroup exerciseGroup, Guid categoryId)
         {
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (c:Category)
-                    WHERE c.id = $categoryId
+                    @"MATCH (c:Category) WHERE c.id = $categoryId
                     CREATE (eg:ExerciseGroup { id: $id, name: $name, note: $note }),
                     (eg)-[:FOR_CATEGORY]->(c)
                     RETURN eg.id, eg.name, eg.note",
@@ -55,6 +68,22 @@ namespace Exero.Api.Repositories.Neo4j
                         name = exerciseGroup.Name,
                         note = exerciseGroup.Note
                     }
+                );
+                exerciseGroup = await GetExerciseGroup(reader);
+            }
+            return exerciseGroup;
+        }
+
+
+        public async Task<ExerciseGroup> Update(ExerciseGroup exerciseGroup)
+        {
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                    @"MATCH (eg:ExerciseGroup) WHERE eg.id = $id 
+                    SET eg.name = $name, eg.note = $note 
+                    RETURN eg.id, eg.name, eg.note",
+                    new { id = exerciseGroup.Id.ToString(), name = exerciseGroup.Name, note = exerciseGroup.Note }
                 );
                 exerciseGroup = await GetExerciseGroup(reader);
             }

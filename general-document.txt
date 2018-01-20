@@ -34,23 +34,6 @@ MATCH (anna:Person {name:"Anna"})
 CREATE (anna)-[:FRIEND]->(:Person:Expert {name:"Amanda"})-[:WORKED_WITH]->(neo)
 
 
-
-c37a1025-21d5-4971-be7d-6fdf69d37d6d
-daf33ccf-045e-4f7f-b9ce-5aecf29f4e3e
-758f55fc-a02b-4919-baff-728e4cd1cc29
-
-
-
-
-
-
-
-
-
-
-
-
-
 CREATE (n:Category { id: 'f2aa9464-189c-49f9-8b6a-5f5451ed0a24', name: 'Strength' })
 CREATE (n:Category { id: 'c37b2c46-d838-4e0d-a517-bb230c598da4', name: 'Conditioning' })
 
@@ -142,7 +125,6 @@ CREATE CONSTRAINT ON (c:Category) ASSERT c.name IS UNIQUE;
 
 CREATE CONSTRAINT ON (u:User) ASSERT u.username IS UNIQUE;
 
-=== GENEREATE DATABASE ===
 
 MATCH (wtc:ExerciseGroup)
 WHERE wtc.id = '8686c885-8296-4bfd-b266-706a3878fe3c'
@@ -158,6 +140,34 @@ CREATE
 (wtb)-[:FOR_CATEGORY]->(cs)
 
 
+// Add relation to existing nodes
+MATCH (u:User {username:'admin'}), (r:Role {name:'ROLE_WEB_USER'})
+CREATE (u)-[:HAS_ROLE]->(r)
+
+
+MATCH (es:ExerciseSession { id:'3e948699-cedf-4bad-a8ab-b1740b61a966' }), (e:Exercise { id:'e4cd73c1-ffdf-4c58-8486-a0c6a6c7d1be' })
+CREATE (es)-[:FOR_EXERCISE]->(e)
+
+
+MATCH (er:ExerciseRecord)-[r:FOR_EXERCISE_SESSION]->(es:ExerciseSession)-[:FOR_EXERCISE]->(e:Exercise)
+WHERE er.id = 'b3df2e05-7597-4582-870b-e9b751521279'
+RETURN e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit
+ORDER BY er.epochTimestamp
+
+MATCH (er:ExerciseRecord)-[r:FOR_EXERCISE_SESSION]->(es:ExerciseSession)-[:FOR_EXERCISE]->(e:Exercise)
+WHERE es.id = '3e948699-cedf-4bad-a8ab-b1740b61a966'
+RETURN e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit
+ORDER BY er.epochTimestamp
+
+MATCH (er:ExerciseRecord)-[r:FOR_EXERCISE_SESSION]->(es:ExerciseSession)-[:FOR_EXERCISE]->(e:Exercise)
+MATCH (es)-[:FOR_WORKOUT_SESSION]->(ws:WorkoutSession)
+WHERE ws.id = '05233326-63b8-46d5-ba69-fd66def56d3d'
+RETURN ws.note, e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit
+ORDER BY er.epochTimestamp
+
+
+=== GENEREATE DATABASE ===
+
 CREATE 
 (cs:Category { id: 'f2aa9464-189c-49f9-8b6a-5f5451ed0a24', name: 'Strength' }),
 (cc:Category { id: 'c37b2c46-d838-4e0d-a517-bb230c598da4', name: 'Conditioning' }),
@@ -168,53 +178,66 @@ CREATE
 (wtb)-[:FOR_CATEGORY]->(cs),
 (wtr)-[:FOR_CATEGORY]->(cc),
 (u:User { id: '2ffa1077-5d93-4ccc-a69c-c420f2e84e22', email: 'test@test.se' }),
-(eb:Exercise { id: 'e4cd73c1-ffdf-4c58-8486-a0c6a6c7d1be', name: 'Benchpress' }),
+(eb:Exercise { id: 'e4cd73c1-ffdf-4c58-8486-a0c6a6c7d1be', name: 'Bench Press' }),
 (edbp:Exercise { id: '256ba0fd-1e4e-463c-84d5-058d665d80f9', name: 'Dumbbell Bench Press' }),
 (ef:Exercise { id: '7eb66864-94cd-48a9-adea-3183a0aed039', name: '5 km' }),
+(edbc:Exercise { id: '05ff8f38-64ba-47d6-964b-b355ef32b278', name: 'Dumbbell Bicep Curl' }),
 (eb)-[:FOR_EXERCISE_GROUP]->(wtc),
 (edbp)-[:FOR_EXERCISE_GROUP]->(wtc),
 (ef)-[:FOR_EXERCISE_GROUP]->(wtr),
-(u)-[:DOES_EXERCISE]->(eb),
-(u)-[:DOES_EXERCISE]->(ef),
+(edbc)-[:FOR_EXERCISE_GROUP]->(wtb),
+(u)-[:DOES_EXERCISE { restTimeSeconds:90, unit:'kg' }]->(eb),
+(u)-[:DOES_EXERCISE { restTimeSeconds:0, unit:'tid' }]->(ef),
+(u)-[:DOES_EXERCISE { restTimeSeconds:90, unit:'kg' }]->(edbc),
 (er1:ExerciseRecord { id: 'b3df2e05-7597-4582-870b-e9b751521279', epochTimestamp: 1512990000, set: 1, reps: 20, value: 20, unit: 'kg', dropSet:false }),
 (er2:ExerciseRecord { id: '223980cd-0cbb-4cf5-85ca-1bfb7932b991', epochTimestamp: 1512990180, set: 2, reps: 12, value: 30, unit: 'kg', dropSet:false }),
 (er3:ExerciseRecord { id: '81062805-4c2b-4c56-9957-ae0025a1715a', epochTimestamp: 1512990360, set: 3, reps: 7, value: 40, unit: 'kg', dropSet:false }),
 (er4:ExerciseRecord { id: '71e6ac94-798f-44ae-a098-348949e63382', epochTimestamp: 1512990540, set: 4, reps: 8, value: 40, unit: 'kg', dropSet:false }),
-(er1)-[:FOR_EXERCISE]->(eb),
-(er2)-[:FOR_EXERCISE]->(eb),
-(er3)-[:FOR_EXERCISE]->(eb),
-(er4)-[:FOR_EXERCISE]->(eb),
 (esb:ExerciseSession { id:'3e948699-cedf-4bad-a8ab-b1740b61a966', note:'Montes' }),
 (er1)-[:FOR_EXERCISE_SESSION]->(esb),
 (er2)-[:FOR_EXERCISE_SESSION]->(esb),
 (er3)-[:FOR_EXERCISE_SESSION]->(esb),
 (er4)-[:FOR_EXERCISE_SESSION]->(esb),
-(ws1:WorkoutSession { id:'05233326-63b8-46d5-ba69-fd66def56d3d', note:'Felt great!' }),
+(esb)-[:FOR_EXERCISE]->(eb),
+(er5:ExerciseRecord { id: 'c37a1025-21d5-4971-be7d-6fdf69d37d6d', epochTimestamp: 1512990960, set: 1, reps: 12, value: 7.5, unit: 'kg', dropSet:false }),
+(er6:ExerciseRecord { id: 'daf33ccf-045e-4f7f-b9ce-5aecf29f4e3e', epochTimestamp: 1512991080, set: 2, reps: 7, value: 10, unit: 'kg', dropSet:false }),
+(er7:ExerciseRecord { id: '758f55fc-a02b-4919-baff-728e4cd1cc29', epochTimestamp: 1512991200, set: 3, reps: 10, value: 7.5, unit: 'kg', dropSet:false }),
+(er8:ExerciseRecord { id: '126d482e-b964-4bc3-b324-6963e8089def', epochTimestamp: 1512991320, set: 4, reps: 10, value: 7.5, unit: 'kg', dropSet:false }),
+(esb1:ExerciseSession { id:'3eaa282b-a043-4578-bbd4-fd34eaa760e6', note:'Fortfarande träningsvärk, Montes' }),
+(er5)-[:FOR_EXERCISE_SESSION]->(esb1),
+(er6)-[:FOR_EXERCISE_SESSION]->(esb1),
+(er7)-[:FOR_EXERCISE_SESSION]->(esb1),
+(er8)-[:FOR_EXERCISE_SESSION]->(esb1),
+(esb1)-[:FOR_EXERCISE]->(edbc),
+(ws1:WorkoutSession { id:'05233326-63b8-46d5-ba69-fd66def56d3d', note:'Felt great!', startEpochTimestamp: 1512990000, endEpochTimestamp: 1512990540 }),
 (esb)-[:FOR_WORKOUT_SESSION]->(ws1),
-(ws1)-[:BY_USER]->(u),
-(ues1:UserExerciseSetting { id:'7edad185-6fff-4b80-b5cc-4957d43ef0c7', restTimeSeconds:90, unit:'kg' }),
-(ues1)-[:FOR_EXERCISE_SETTING]->(eb),
-(ues1)-[:FOR_USER]->(u)
+(esb1)-[:FOR_WORKOUT_SESSION]->(ws1),
+(ws1)-[:BY_USER]->(u)
 
 
-CREATE CONSTRAINT ON (c:Category) ASSERT c.id IS UNIQUE;
-CREATE CONSTRAINT ON (eg:ExerciseGroup) ASSERT eg.id IS UNIQUE;
-CREATE CONSTRAINT ON (e:Exercise) ASSERT e.id IS UNIQUE;
+
+CREATE CONSTRAINT ON (c:Category) ASSERT c.id IS UNIQUE
+CREATE CONSTRAINT ON (eg:ExerciseGroup) ASSERT eg.id IS UNIQUE
+CREATE CONSTRAINT ON (e:Exercise) ASSERT e.id IS UNIQUE
+CREATE CONSTRAINT ON (u:User) ASSERT u.id IS UNIQUE
 ...
 
 
-05ff8f38-64ba-47d6-964b-b355ef32b278
-3eaa282b-a043-4578-bbd4-fd34eaa760e6
+(er1)-[:FOR_EXERCISE]->(eb),
+(er2)-[:FOR_EXERCISE]->(eb),
+(er3)-[:FOR_EXERCISE]->(eb),
+(er4)-[:FOR_EXERCISE]->(eb),
 
 ==========================
+
+// Connect Sally to Graph Databases book
+CREATE (sally)-[:HAS_READ { rating: 4, on: 1360396800 }]->(gdb)
 
 Category
 ExerciseGroup -[:FOR_CATEGORY]-> Category
 Exercise -[:FOR_EXERCISE_GROUP]-> ExerciseGroup
 User -[:RECORDED_EXERCISE]-> ExerciseRecord
      -[:DOES_EXERCISE]-> Exercise
-UserExerciseSetting -[:FOR_EXERCISE_SETTING]-> Exercise
-                    -[:FOR_USER]-> User
 ExerciseRecord -[:FOR_EXERCISE_SESSION]-> ExerciseSession
                -[:FOR_EXERCISE]-> Exercise
 ExerciseSession -[:FOR_WORKOUT_SESSION]-> WorkoutSession
@@ -242,11 +265,6 @@ User -[:RECORDED_EXERCISE]-> ExerciseRecord
      -[:DOES_EXERCISE]-> Exercise
 - email
 - ...
-
-UserExerciseSetting -[:FOR_EXERCISE_SETTING]-> Exercise
-                    -[:FOR_USER]-> User
-- restTimeSeconds
-- unit
 
 ExerciseRecord -[:FOR_EXERCISE_SESSION]-> ExerciseSession
                -[:FOR_EXERCISE]-> Exercise

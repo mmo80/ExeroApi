@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Exero.Api.Controllers
 {
+    [Produces("application/json")]
     [Route("api/user")]
     public class CategoryController : Controller
     {
@@ -20,21 +21,21 @@ namespace Exero.Api.Controllers
             //_userRepository = userRepository;
         }
 
-        [HttpGet("{userid}/category")]
+        [HttpGet("{userid}/categories")]
         public async Task<IEnumerable<CategoryApi>> GetCategories(Guid userId)
         {
             var categories = await _categoryRepository.GetAll(userId);
             return categories.Select(x => new CategoryApi { Id = x.Id, Name = x.Name, Note = x.Note });
         }
 
-        [HttpGet("{userid}/category/{id}", Name = "GetCategory")]
+        [HttpGet("{userid}/categories/{id}", Name = "GetCategory")]
         public async Task<CategoryApi> GetCategory(Guid userId, Guid id)
         {
             var category = await _categoryRepository.Get(userId, id);
             return new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note };
         }
 
-        [HttpPost("{userid}/category")]
+        [HttpPost("{userid}/categories")]
         public async Task<IActionResult> Post(Guid userId, [FromBody]CategoryUpdateApi categoryUpdate)
         {
             //var user = await _userRepository.Get(userId);
@@ -52,14 +53,14 @@ namespace Exero.Api.Controllers
                 new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note });
         }
 
-        [HttpPut("{userid}/category/{id}")]
+        [HttpPut("{userid}/categories/{id}")]
         public async Task<IActionResult> Update(Guid userId, Guid id, [FromBody]CategoryUpdateApi categoryUpdate)
         {
             await _categoryRepository.Update(userId, id, categoryUpdate.Name, categoryUpdate.Note);
             return NoContent();
         }
 
-        [HttpDelete("{userid}/category/{id}")]
+        [HttpDelete("{userid}/categories/{id}")]
         public async Task<IActionResult> Delete(Guid userId, Guid id)
         {
             await _categoryRepository.Remove(userId, id);
