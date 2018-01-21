@@ -6,7 +6,7 @@ namespace Exero.Api.Models
     {
         public double EpochTimestamp { get; set; }
         public string Set { get; set; }
-        public int Reps { get; set; }
+        public Int64 Reps { get; set; }
         public double Value { get; set; }
         public string Unit { get; set; }
         public bool DropSet { get; set; }

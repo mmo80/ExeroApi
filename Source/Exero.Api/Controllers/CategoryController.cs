@@ -21,21 +21,21 @@ namespace Exero.Api.Controllers
             //_userRepository = userRepository;
         }
 
-        [HttpGet("{userid}/categories")]
+        [HttpGet("{userid:guid}/categories")]
         public async Task<IEnumerable<CategoryApi>> GetCategories(Guid userId)
         {
             var categories = await _categoryRepository.GetAll(userId);
             return categories.Select(x => new CategoryApi { Id = x.Id, Name = x.Name, Note = x.Note });
         }
 
-        [HttpGet("{userid}/categories/{id}", Name = "GetCategory")]
+        [HttpGet("{userid:guid}/categories/{id:guid}", Name = "GetCategory")]
         public async Task<CategoryApi> GetCategory(Guid userId, Guid id)
         {
             var category = await _categoryRepository.Get(userId, id);
             return new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note };
         }
 
-        [HttpPost("{userid}/categories")]
+        [HttpPost("{userid:guid}/categories")]
         public async Task<IActionResult> Post(Guid userId, [FromBody]CategoryUpdateApi categoryUpdate)
         {
             //var user = await _userRepository.Get(userId);
@@ -53,14 +53,14 @@ namespace Exero.Api.Controllers
                 new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note });
         }
 
-        [HttpPut("{userid}/categories/{id}")]
+        [HttpPut("{userid:guid}/categories/{id:guid}")]
         public async Task<IActionResult> Update(Guid userId, Guid id, [FromBody]CategoryUpdateApi categoryUpdate)
         {
             await _categoryRepository.Update(userId, id, categoryUpdate.Name, categoryUpdate.Note);
             return NoContent();
         }
 
-        [HttpDelete("{userid}/categories/{id}")]
+        [HttpDelete("{userid:guid}/categories/{id:guid}")]
         public async Task<IActionResult> Delete(Guid userId, Guid id)
         {
             await _categoryRepository.Remove(userId, id);

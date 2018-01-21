@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
 
@@ -15,18 +14,25 @@ namespace Exero.Api.Repositories.Neo4j
             _graphRepository = graphRepository;
         }
 
-        // TODO: Add filter 'to' and 'from' epoch timestamp in WHERE clause
-        public async Task<List<WorkoutSession>> ByUser(Guid userId, int limit = 31)
+        public async Task<List<WorkoutSession>> ByUser(Guid userId, DateTime from, DateTime to, int limit = 31)
         {
             var list = new List<WorkoutSession>();
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
                     @"MATCH (ws:WorkoutSession)-[r:BY_USER]->(u:User) 
-                    WHERE u.id = $id
+                    WHERE u.id = $id and 
+                        ws.startEpochTimestamp >= $startEpochTimestamp and
+                        ws.endEpochTimestamp <= $endEpochTimestamp
                     RETURN ws.id, ws.note, ws.startEpochTimestamp, ws.endEpochTimestamp
                     LIMIT $limit",
-                    new { id = userId.ToString(), limit = limit });
+                    new
+                    {
+                        id = userId.ToString(),
+                        startEpochTimestamp = ToEpoch(from),
+                        endEpochTimestamp = ToEpoch(to),
+                        limit = limit
+                    });
 
                 while (await reader.FetchAsync())
                 {
@@ -34,12 +40,20 @@ namespace Exero.Api.Repositories.Neo4j
                     {
                         Id = Guid.Parse(reader.Current[0].ToString()),
                         Note = reader.Current[1].ToString(),
-                        StartEpochTimestamp = (double)reader.Current[2],
-                        EndEpochTimestamp = (double)reader.Current[3]
+                        StartEpochTimestamp = double.Parse(reader.Current[2].ToString()),
+                        EndEpochTimestamp = double.Parse(reader.Current[3].ToString())
                     });
                 }
             }
             return list;
         }
+
+        // url: https://codereview.stackexchange.com/q/125275
+        /// <summary>
+        /// Converts a DateTime to the long representation which is the number of seconds since the unix epoch.
+        /// </summary>
+        /// <param name="dateTime">A DateTime to convert to epoch time.</param>
+        /// <returns>The long number of seconds since the unix epoch.</returns>
+        public static long ToEpoch(DateTime dateTime) => (long)(dateTime - new DateTime(1970, 1, 1)).TotalSeconds;
     }
 }

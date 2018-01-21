@@ -7,6 +7,6 @@ namespace Exero.Api.Repositories
 {
     public interface IWorkoutSessionRepository
     {
-        Task<List<WorkoutSession>> ByUser(Guid userId, int limit = 31);
+        Task<List<WorkoutSession>> ByUser(Guid userId, DateTime from, DateTime to, int limit = 31);
     }
 }

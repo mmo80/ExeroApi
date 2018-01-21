@@ -47,10 +47,10 @@ namespace Exero.Api.Repositories.Neo4j
                     exerciseSession.Records.Add(new ExerciseRecord()
                     {
                         Id = Guid.Parse(reader.Current[3].ToString()),
-                        EpochTimestamp = (int)reader.Current[4],
+                        EpochTimestamp = double.Parse(reader.Current[4].ToString()),
                         Set = reader.Current[5].ToString(),
-                        Reps = (int)reader.Current[6],
-                        Value = (double)reader.Current[7],
+                        Reps = (Int64)reader.Current[6],
+                        Value = double.Parse(reader.Current[7].ToString()),
                         Unit = reader.Current[8].ToString(),
                         DropSet = (bool)reader.Current[9]
                     });
