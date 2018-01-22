@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Exero.Api.Common;
 using Exero.Api.Models;
+using Neo4j.Driver.V1;
 
 namespace Exero.Api.Repositories.Neo4j
 {
@@ -29,8 +31,8 @@ namespace Exero.Api.Repositories.Neo4j
                     new
                     {
                         id = userId.ToString(),
-                        startEpochTimestamp = ToEpoch(from),
-                        endEpochTimestamp = ToEpoch(to),
+                        startEpochTimestamp = from.ToEpoch(),
+                        endEpochTimestamp = to.ToEpoch(),
                         limit = limit
                     });
 
@@ -48,12 +50,65 @@ namespace Exero.Api.Repositories.Neo4j
             return list;
         }
 
-        // url: https://codereview.stackexchange.com/q/125275
-        /// <summary>
-        /// Converts a DateTime to the long representation which is the number of seconds since the unix epoch.
-        /// </summary>
-        /// <param name="dateTime">A DateTime to convert to epoch time.</param>
-        /// <returns>The long number of seconds since the unix epoch.</returns>
-        public static long ToEpoch(DateTime dateTime) => (long)(dateTime - new DateTime(1970, 1, 1)).TotalSeconds;
+        public async Task<WorkoutSession> Add(WorkoutSession workoutSession, Guid userId)
+        {
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                    @"MATCH (u:User { id = $userId })
+                    CREATE (ws:WorkoutSession { id: $id, note: $note, startEpochTimestamp: $startEpochTimestamp, endEpochTimestamp: 0 }),
+                    (ws)-[:BY_USER]->(u)
+                    RETURN ws.id, ws.note, ws.startEpochTimestamp, ws.endEpochTimestamp",
+                    new
+                    {
+                        userId = userId,
+                        id = workoutSession.Id.ToString(),
+                        note = workoutSession.Note,
+                        startEpochTimestamp = workoutSession.StartEpochTimestamp
+                    }
+                );
+                workoutSession = await GetWorkoutSession(reader);
+            }
+            return workoutSession;
+        }
+
+        public async Task<WorkoutSession> Update(WorkoutSession workoutSession)
+        {
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                    @"MATCH (ws:WorkoutSession { id = $id }) 
+                    SET ws.name = $name, ws.note = $note, 
+                    ws.startEpochTimestamp = $startEpochTimestamp, ws.endEpochTimestamp = $endEpochTimestamp
+                    RETURN ws.id, ws.note, ws.startEpochTimestamp, ws.endEpochTimestamp",
+                    new
+                    {
+                        id = workoutSession.Id.ToString(),
+                        note = workoutSession.Note,
+                        startEpochTimestamp = workoutSession.StartEpochTimestamp,
+                        endEpochTimestamp = workoutSession.EndEpochTimestamp
+                    }
+                );
+                workoutSession = await GetWorkoutSession(reader);
+            }
+            return workoutSession;
+        }
+
+
+        private async Task<WorkoutSession> GetWorkoutSession(IStatementResultCursor reader)
+        {
+            WorkoutSession item = null;
+            while (await reader.FetchAsync())
+            {
+                item = new WorkoutSession()
+                {
+                    Id = Guid.Parse(reader.Current[0].ToString()),
+                    Note = reader.Current[1].ToString(),
+                    StartEpochTimestamp = double.Parse(reader.Current[2].ToString()),
+                    EndEpochTimestamp = double.Parse(reader.Current[3].ToString())
+                };
+            }
+            return item;
+        }
     }
 }

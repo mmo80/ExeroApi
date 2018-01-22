@@ -75,6 +75,8 @@ namespace Exero.Api.Repositories.Neo4j
             return exercise;
         }
 
+        // TODO: Add Exercse to User?
+
         public async Task<Exercise> Update(Exercise exercise)
         {
             using (var session = _graphRepository.Driver.Session())

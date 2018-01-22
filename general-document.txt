@@ -172,8 +172,8 @@ Exercise -[:FOR_EXERCISE_GROUP]-> ExerciseGroup
 User -[:RECORDED_EXERCISE]-> ExerciseRecord
      -[:DOES_EXERCISE]-> Exercise
 ExerciseRecord -[:FOR_EXERCISE_SESSION]-> ExerciseSession
-               -[:FOR_EXERCISE]-> Exercise
 ExerciseSession -[:FOR_WORKOUT_SESSION]-> WorkoutSession
+                -[:FOR_EXERCISE]-> Exercise
 WorkoutSession -[:BY_USER]-> User
 
 
@@ -200,7 +200,6 @@ User -[:RECORDED_EXERCISE]-> ExerciseRecord
 - ...
 
 ExerciseRecord -[:FOR_EXERCISE_SESSION]-> ExerciseSession
-               -[:FOR_EXERCISE]-> Exercise
 - epochTimestamp
 - set (string) 1, 1B, 1C (dropset)
 - reps
@@ -211,6 +210,7 @@ ExerciseRecord -[:FOR_EXERCISE_SESSION]-> ExerciseSession
 - videoUrl / videoFile
 
 ExerciseSession -[:FOR_WORKOUT_SESSION]-> WorkoutSession
+                -[:FOR_EXERCISE]-> Exercise
 - note
 
 WorkoutSession -[:BY_USER]-> User
@@ -219,5 +219,13 @@ WorkoutSession -[:BY_USER]-> User
 - note
 - imageUrl
 
+
+==========================
+
+
+Flow
+----
+User -> starts WorkoutSession -> Adds exercise that creates ExerciseSession -> Add ExerciseRecord for ExerciseSession
+Creates traning schedule...
 
 ==========================

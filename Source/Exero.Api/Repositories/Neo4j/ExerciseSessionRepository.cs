@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
+using Neo4j.Driver.V1;
 
 namespace Exero.Api.Repositories.Neo4j
 {
@@ -57,6 +58,46 @@ namespace Exero.Api.Repositories.Neo4j
                 }
             }
             return list;
+        }
+
+        public async Task<ExerciseSession> Add(ExerciseSession exerciseSession, Guid exerciseId, Guid workoutSessionId)
+        {
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                    @"MATCH (e:Exercise { id = $exerciseId })
+                    MATCH (ws:WorkoutSession { id = $workoutSessionId })
+                    CREATE (es:ExerciseSession { id: $id, note: $note }),
+                    (es)-[:FOR_EXERCISE]->(e),
+                    (es)-[:FOR_WORKOUT_SESSION]->(ws)
+                    RETURN es.id, es.note, e.name",
+                    new
+                    {
+                        exerciseId = exerciseId,
+                        workoutSessionId = workoutSessionId,
+                        id = exerciseSession.Id.ToString(),
+                        note = exerciseSession.Note
+                    }
+                );
+                exerciseSession = await GetExerciseSession(reader);
+            }
+            return exerciseSession;
+        }
+
+
+        private async Task<ExerciseSession> GetExerciseSession(IStatementResultCursor reader)
+        {
+            ExerciseSession item = null;
+            while (await reader.FetchAsync())
+            {
+                item = new ExerciseSession()
+                {
+                    Id = Guid.Parse(reader.Current[0].ToString()),
+                    Note = reader.Current[1].ToString(),
+                    ExerciseName = reader.Current[2].ToString()
+                };
+            }
+            return item;
         }
     }
 }
