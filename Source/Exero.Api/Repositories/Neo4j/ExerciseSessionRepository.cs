@@ -60,7 +60,25 @@ namespace Exero.Api.Repositories.Neo4j
             return list;
         }
 
-        public async Task<ExerciseSession> Add(ExerciseSession exerciseSession, Guid exerciseId, Guid workoutSessionId)
+        public async Task<ExerciseSession> Get(Guid id)
+        {
+            ExerciseSession item;
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                    @"MATCH (er:ExerciseRecord)-[r:FOR_EXERCISE_SESSION]->(es:ExerciseSession)-[:FOR_EXERCISE]->(e:Exercise)
+                    WHERE es.id = $id
+                    RETURN es.id, es.note, e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit, er.dropSet
+                    ORDER BY er.epochTimestamp",
+                    new { id = id.ToString() }
+                );
+                item = await GetExerciseSessionComplete(reader);
+            }
+            return item;
+        }
+
+        public async Task<ExerciseSession> Add(
+            ExerciseSession exerciseSession, Guid exerciseId, Guid workoutSessionId)
         {
             using (var session = _graphRepository.Driver.Session())
             {
@@ -98,6 +116,36 @@ namespace Exero.Api.Repositories.Neo4j
                 };
             }
             return item;
+        }
+
+        private async Task<ExerciseSession> GetExerciseSessionComplete(IStatementResultCursor reader)
+        {
+            var exerciseSession = new ExerciseSession();
+            while (await reader.FetchAsync())
+            {
+                var exerciseSessionId = Guid.Parse(reader.Current[0].ToString());
+                if (exerciseSession.Id != exerciseSessionId)
+                {
+                    exerciseSession = new ExerciseSession()
+                    {
+                        Id = exerciseSessionId,
+                        Note = reader.Current[1].ToString(),
+                        ExerciseName = reader.Current[2].ToString(),
+                        Records = new List<ExerciseRecord>()
+                    };
+                }
+                exerciseSession.Records.Add(new ExerciseRecord()
+                {
+                    Id = Guid.Parse(reader.Current[3].ToString()),
+                    EpochTimestamp = double.Parse(reader.Current[4].ToString()),
+                    Set = reader.Current[5].ToString(),
+                    Reps = (Int64)reader.Current[6],
+                    Value = double.Parse(reader.Current[7].ToString()),
+                    Unit = reader.Current[8].ToString(),
+                    DropSet = (bool)reader.Current[9]
+                });
+            }
+            return exerciseSession;
         }
     }
 }

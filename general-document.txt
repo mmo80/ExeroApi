@@ -157,6 +157,7 @@ CREATE CONSTRAINT ON (c:Category) ASSERT c.id IS UNIQUE
 CREATE CONSTRAINT ON (eg:ExerciseGroup) ASSERT eg.id IS UNIQUE
 CREATE CONSTRAINT ON (e:Exercise) ASSERT e.id IS UNIQUE
 CREATE CONSTRAINT ON (u:User) ASSERT u.id IS UNIQUE
+
 ...
 
 ======================
@@ -219,13 +220,5 @@ WorkoutSession -[:BY_USER]-> User
 - note
 - imageUrl
 
-
-==========================
-
-
-Flow
-----
-User -> starts WorkoutSession -> Adds exercise that creates ExerciseSession -> Add ExerciseRecord for ExerciseSession
-Creates traning schedule...
 
 ==========================

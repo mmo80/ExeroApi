@@ -13,12 +13,10 @@ namespace Exero.Api.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;
-        //private readonly IUserRepository _userRepository;
 
-        public CategoryController(ICategoryRepository categoryRepository) // , IUserRepository userRepository
+        public CategoryController(ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
-            //_userRepository = userRepository;
         }
 
         [HttpGet("{userid:guid}/categories")]
@@ -38,13 +36,11 @@ namespace Exero.Api.Controllers
         [HttpPost("{userid:guid}/categories")]
         public async Task<IActionResult> Post(Guid userId, [FromBody]CategoryUpdateApi categoryUpdate)
         {
-            //var user = await _userRepository.Get(userId);
-            var category = new Category()
+            var category = new Category
             {
                 Id = Guid.NewGuid(),
                 Name = categoryUpdate.Name,
-                Note = categoryUpdate.Note,
-                //User = user
+                Note = categoryUpdate.Note
             };
             await _categoryRepository.Add(category);
 
@@ -54,7 +50,8 @@ namespace Exero.Api.Controllers
         }
 
         [HttpPut("{userid:guid}/categories/{id:guid}")]
-        public async Task<IActionResult> Update(Guid userId, Guid id, [FromBody]CategoryUpdateApi categoryUpdate)
+        public async Task<IActionResult> Update(
+            Guid userId, Guid id, [FromBody]CategoryUpdateApi categoryUpdate)
         {
             await _categoryRepository.Update(userId, id, categoryUpdate.Name, categoryUpdate.Note);
             return NoContent();

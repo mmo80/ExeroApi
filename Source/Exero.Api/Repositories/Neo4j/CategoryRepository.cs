@@ -42,7 +42,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    "MATCH (n:Category) WHERE n.id = $id RETURN n.id, n.name, n.note",
+                    "MATCH (c:Category) WHERE c.id = $id RETURN c.id, c.name, c.note",
                     new { id = id.ToString() }
                 );
                 category = await GetCategory(reader);
@@ -56,7 +56,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    "CREATE (n:Category { id: $id, name: $name }) RETURN n.id, n.name, n.note",
+                    "CREATE (c:Category { id: $id, name: $name }) RETURN c.id, c.name, c.note",
                     new { id = category.Id.ToString(), name = category.Name }
                 );
                 category = await GetCategory(reader);
@@ -70,8 +70,8 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (n:Category) WHERE n.id = $id SET n.name = $name, n.note = $note 
-                    RETURN n.id, n.name, n.note",
+                    @"MATCH (c:Category) WHERE c.id = $id SET c.name = $name, c.note = $note 
+                    RETURN c.id, c.name, c.note",
                     new { id = id.ToString(), name = name, note = note }
                 );
                 category = await GetCategory(reader);
@@ -86,7 +86,6 @@ namespace Exero.Api.Repositories.Neo4j
                 // Deletes node and all relationships to it.
                 await session.RunAsync(
                     "OPTIONAL MATCH (c:Category)<-[r]-() WHERE c.id = $id DELETE r, c",
-                    //"MATCH (n:Category) WHERE n.id = $id DELETE n",
                     new { id = id.ToString() }
                 );
             }

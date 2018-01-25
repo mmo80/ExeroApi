@@ -75,7 +75,28 @@ namespace Exero.Api.Repositories.Neo4j
             return exercise;
         }
 
-        // TODO: Add Exercse to User?
+        public async Task RelateExerciseToUser(Guid exerciseId, Guid userId)
+        {
+            // TODO: Check if relation already made!
+            // url: https://stackoverflow.com/a/34839121
+            /*
+MATCH (a:User {name:"userA"}),(b:User {name:"userB"})
+WHERE NOT (a)-[:KNOWS]-(b)
+WITH a,b
+CREATE (c:User {name:"userC",id:rand()})
+CREATE (a)-[:KNOWS]->(c)
+CREATE (b)-[:KNOWS]->(c);
+             */
+            using (var session = _graphRepository.Driver.Session())
+            {
+                await session.RunAsync(
+                    @"MATCH (e:Exercise { id = $exerciseId })
+                    MATCH (u:User { id = $userId })
+                    CREATE (u)-[:DOES_EXERCISE]->(e)",
+                    new { exerciseId = exerciseId.ToString(), userId = userId.ToString() }
+                );
+            }
+        }
 
         public async Task<Exercise> Update(Exercise exercise)
         {

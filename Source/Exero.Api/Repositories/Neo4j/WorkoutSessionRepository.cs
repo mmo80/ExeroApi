@@ -16,7 +16,23 @@ namespace Exero.Api.Repositories.Neo4j
             _graphRepository = graphRepository;
         }
 
-        public async Task<List<WorkoutSession>> ByUser(Guid userId, DateTime from, DateTime to, int limit = 31)
+        public async Task<WorkoutSession> Get(Guid id)
+        {
+            WorkoutSession item;
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                    @"MATCH (ws:WorkoutSession) WHERE ws.id = $id 
+                    RETURN ws.id, ws.note, ws.startEpochTimestamp, ws.endEpochTimestamp",
+                    new { id = id.ToString() }
+                );
+                item = await GetWorkoutSession(reader);
+            }
+            return item;
+        }
+
+        public async Task<List<WorkoutSession>> ByUser(
+            Guid userId, DateTime from, DateTime to, int limit = 31)
         {
             var list = new List<WorkoutSession>();
             using (var session = _graphRepository.Driver.Session())
