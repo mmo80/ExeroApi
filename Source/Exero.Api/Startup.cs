@@ -1,4 +1,5 @@
-﻿using Exero.Api.Repositories;
+﻿using Exero.Api.Middleware;
+using Exero.Api.Repositories;
 using Exero.Api.Repositories.Memory;
 using Exero.Api.Repositories.Neo4j;
 using Microsoft.AspNetCore.Builder;
@@ -58,7 +59,7 @@ namespace Exero.Api
             }
 
             app.UseRewriter(new RewriteOptions().AddRedirectToHttps(301, 44343));
-
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();
         }
     }

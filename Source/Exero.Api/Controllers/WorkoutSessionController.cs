@@ -21,30 +21,30 @@ namespace Exero.Api.Controllers
         }
 
         [HttpGet("{userid:guid}/workoutsessions")]
-        public async Task<IEnumerable<WorkoutSessionApi>> GetWorkoutSessions(
+        public async Task<IActionResult> GetWorkoutSessions(
             Guid userId, [FromQuery] DateTime from, [FromQuery] DateTime to, [FromQuery] int limit = 31)
         {
             var list = await _workoutSessionRepository.ByUser(userId, from, to, limit);
-            return list.Select(x => new WorkoutSessionApi
+            return Ok(list.Select(x => new WorkoutSessionApi
             {
                 Id = x.Id,
                 Note = x.Note,
                 StartDatetime = x.StartDatetime,
                 EndDatetime = x.EndDatetime
-            });
+            }));
         }
 
         [HttpGet("{userid:guid}/workoutsessions/{id:guid}", Name = "GetWorkoutSession")]
-        public async Task<WorkoutSessionApi> GetWorkoutSession(Guid userId, Guid id)
+        public async Task<IActionResult> GetWorkoutSession(Guid userId, Guid id)
         {
             var workoutSession = await _workoutSessionRepository.Get(id);
-            return new WorkoutSessionApi
+            return Ok(new WorkoutSessionApi
             {
                 Id = workoutSession.Id,
                 Note = workoutSession.Note,
                 StartDatetime = workoutSession.StartDatetime,
                 EndDatetime = workoutSession.EndDatetime
-            };
+            });
         }
 
         [HttpPost("{userid:guid}/workoutsessions")]

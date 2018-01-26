@@ -20,17 +20,20 @@ namespace Exero.Api.Controllers
         }
 
         [HttpGet("{userid:guid}/categories")]
-        public async Task<IEnumerable<CategoryApi>> GetCategories(Guid userId)
+        public async Task<IActionResult> GetCategories(Guid userId)
         {
             var categories = await _categoryRepository.GetAll(userId);
-            return categories.Select(x => new CategoryApi { Id = x.Id, Name = x.Name, Note = x.Note });
+            return Ok(categories.Select(x => new CategoryApi { Id = x.Id, Name = x.Name, Note = x.Note }));
         }
 
         [HttpGet("{userid:guid}/categories/{id:guid}", Name = "GetCategory")]
-        public async Task<CategoryApi> GetCategory(Guid userId, Guid id)
+        public async Task<IActionResult> GetCategory(Guid userId, Guid id)
         {
             var category = await _categoryRepository.Get(userId, id);
-            return new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note };
+            if (category == null)
+                return NotFound();
+            
+            return Ok(new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note });
         }
 
         [HttpPost("{userid:guid}/categories")]
@@ -60,6 +63,10 @@ namespace Exero.Api.Controllers
         [HttpDelete("{userid:guid}/categories/{id:guid}")]
         public async Task<IActionResult> Delete(Guid userId, Guid id)
         {
+            var category = await _categoryRepository.Get(userId, id);
+            if (category == null)
+                return NotFound();
+
             await _categoryRepository.Remove(userId, id);
             return NoContent();
         }

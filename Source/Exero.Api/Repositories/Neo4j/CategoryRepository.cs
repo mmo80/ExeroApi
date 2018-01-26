@@ -29,7 +29,7 @@ namespace Exero.Api.Repositories.Neo4j
                     {
                         Id = Guid.Parse(reader.Current[0].ToString()),
                         Name = reader.Current[1].ToString(),
-                        Note = reader.Current[2].ToString()
+                        Note = reader.Current[2]?.ToString()
                     });
                 }
             }
@@ -101,7 +101,7 @@ namespace Exero.Api.Repositories.Neo4j
                 {
                     Id = Guid.Parse(reader.Current[0].ToString()),
                     Name = reader.Current[1].ToString(),
-                    Note = reader.Current[2].ToString()
+                    Note = reader.Current[2]?.ToString()
                 };
             }
             return item;

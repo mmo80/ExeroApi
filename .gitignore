@@ -320,3 +320,8 @@ ASALocalRun/
 
 # MSBuild Binary and Structured Log
 *.binlog
+
+
+# Exero specific
+appsettings.json
+appsettings.Development.json

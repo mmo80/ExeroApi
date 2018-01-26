@@ -78,6 +78,7 @@ namespace Exero.Api.Repositories.Neo4j
         public async Task RelateExerciseToUser(Guid exerciseId, Guid userId)
         {
             // TODO: Check if relation already made!
+            // url: OPTIONAL MATCH https://stackoverflow.com/a/43349422
             // url: https://stackoverflow.com/a/34839121
             /*
 MATCH (a:User {name:"userA"}),(b:User {name:"userB"})

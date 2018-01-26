@@ -19,17 +19,17 @@ namespace Exero.Api.Controllers
         }
 
         [HttpGet("{userid:guid}/exercisegroups/{groupid:guid}/exercises")]
-        public async Task<IEnumerable<ExerciseApi>> GetExercises(Guid userId, Guid groupId)
+        public async Task<IActionResult> GetExercises(Guid userId, Guid groupId)
         {
             var exercises = await _exerciseRepository.ByGroup(groupId);
-            return exercises.Select(x => new ExerciseApi { Id = x.Id, Name = x.Name, Note = x.Note });
+            return Ok(exercises.Select(x => new ExerciseApi { Id = x.Id, Name = x.Name, Note = x.Note }));
         }
 
         [HttpGet("{userid:guid}/exercisegroups/{groupid:guid}/exercises/{id}", Name = "GetExercise")]
-        public async Task<ExerciseApi> GetExercise(Guid userId, Guid groupId, Guid id)
+        public async Task<IActionResult> GetExercise(Guid userId, Guid groupId, Guid id)
         {
             var exercise = await _exerciseRepository.Get(id);
-            return new ExerciseApi { Id = exercise.Id, Name = exercise.Name, Note = exercise.Note };
+            return Ok(new ExerciseApi { Id = exercise.Id, Name = exercise.Name, Note = exercise.Note });
         }
 
         [HttpPost("{userid:guid}/exercisegroups/{groupid:guid}/exercises")]
