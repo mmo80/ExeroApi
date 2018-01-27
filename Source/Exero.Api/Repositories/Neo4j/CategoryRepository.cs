@@ -42,7 +42,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    "MATCH (c:Category) WHERE c.id = $id RETURN c.id, c.name, c.note",
+                    "MATCH (c:Category { id: $id }) RETURN c.id, c.name, c.note",
                     new { id = id.ToString() }
                 );
                 category = await GetCategory(reader);
@@ -70,7 +70,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (c:Category) WHERE c.id = $id SET c.name = $name, c.note = $note 
+                    @"MATCH (c:Category { id: $id }) SET c.name = $name, c.note = $note 
                     RETURN c.id, c.name, c.note",
                     new { id = id.ToString(), name = name, note = note }
                 );
@@ -85,7 +85,8 @@ namespace Exero.Api.Repositories.Neo4j
             {
                 // Deletes node and all relationships to it.
                 await session.RunAsync(
-                    "OPTIONAL MATCH (c:Category)<-[r]-() WHERE c.id = $id DELETE r, c",
+                    @"OPTIONAL MATCH (c:Category { id: $id })<-[r]-() 
+                    DELETE r, c",
                     new { id = id.ToString() }
                 );
             }

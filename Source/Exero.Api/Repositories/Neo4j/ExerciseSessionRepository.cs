@@ -22,10 +22,9 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (er:ExerciseRecord)-[r:FOR_EXERCISE_SESSION]->(es:ExerciseSession)-[:FOR_EXERCISE]->(e:Exercise)
-                    MATCH (es)-[:FOR_WORKOUT_SESSION]->(ws:WorkoutSession)
-                    WHERE ws.id = $id
-                    RETURN es.id, es.note, e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit, er.dropSet
+                    @"MATCH (er:ExerciseRecord)-[r:FOR_EXERCISE_SESSION]->(es:ExerciseSession)-[:FOR_EXERCISE]->(e:Exercise), 
+                    (es)-[:FOR_WORKOUT_SESSION]->(ws:WorkoutSession { id: $id })
+                    RETURN es.id, es.note, e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit, er.dropSet, er.note
                     ORDER BY er.epochTimestamp",
                     new { id = workoutSessionId.ToString() });
 
@@ -39,7 +38,7 @@ namespace Exero.Api.Repositories.Neo4j
                         exerciseSession = new ExerciseSession()
                         {
                             Id = exerciseSessionId,
-                            Note = reader.Current[1].ToString(),
+                            Note = reader.Current[1]?.ToString(),
                             ExerciseName = reader.Current[2].ToString(),
                             Records = new List<ExerciseRecord>()
                         };
@@ -52,8 +51,9 @@ namespace Exero.Api.Repositories.Neo4j
                         Set = reader.Current[5].ToString(),
                         Reps = (Int64)reader.Current[6],
                         Value = double.Parse(reader.Current[7].ToString()),
-                        Unit = reader.Current[8].ToString(),
-                        DropSet = (bool)reader.Current[9]
+                        Unit = reader.Current[8]?.ToString(),
+                        DropSet = (bool)reader.Current[9],
+                        Note = reader.Current[10]?.ToString()
                     });
                 }
             }
@@ -66,9 +66,8 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (er:ExerciseRecord)-[r:FOR_EXERCISE_SESSION]->(es:ExerciseSession)-[:FOR_EXERCISE]->(e:Exercise)
-                    WHERE es.id = $id
-                    RETURN es.id, es.note, e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit, er.dropSet
+                    @"MATCH (er:ExerciseRecord)-[r:FOR_EXERCISE_SESSION]->(es:ExerciseSession { id: $id })-[:FOR_EXERCISE]->(e:Exercise)
+                    RETURN es.id, es.note, e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit, er.dropSet, er.note
                     ORDER BY er.epochTimestamp",
                     new { id = id.ToString() }
                 );
@@ -83,8 +82,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (e:Exercise { id = $exerciseId })
-                    MATCH (ws:WorkoutSession { id = $workoutSessionId })
+                    @"MATCH (e:Exercise { id: $exerciseId }), (ws:WorkoutSession { id: $workoutSessionId })
                     CREATE (es:ExerciseSession { id: $id, note: $note }),
                     (es)-[:FOR_EXERCISE]->(e),
                     (es)-[:FOR_WORKOUT_SESSION]->(ws)
@@ -111,7 +109,7 @@ namespace Exero.Api.Repositories.Neo4j
                 item = new ExerciseSession()
                 {
                     Id = Guid.Parse(reader.Current[0].ToString()),
-                    Note = reader.Current[1].ToString(),
+                    Note = reader.Current[1]?.ToString(),
                     ExerciseName = reader.Current[2].ToString()
                 };
             }
@@ -129,7 +127,7 @@ namespace Exero.Api.Repositories.Neo4j
                     exerciseSession = new ExerciseSession()
                     {
                         Id = exerciseSessionId,
-                        Note = reader.Current[1].ToString(),
+                        Note = reader.Current[1]?.ToString(),
                         ExerciseName = reader.Current[2].ToString(),
                         Records = new List<ExerciseRecord>()
                     };
@@ -141,8 +139,9 @@ namespace Exero.Api.Repositories.Neo4j
                     Set = reader.Current[5].ToString(),
                     Reps = (Int64)reader.Current[6],
                     Value = double.Parse(reader.Current[7].ToString()),
-                    Unit = reader.Current[8].ToString(),
-                    DropSet = (bool)reader.Current[9]
+                    Unit = reader.Current[8]?.ToString(),
+                    DropSet = (bool)reader.Current[9],
+                    Note = reader.Current[10]?.ToString()
                 });
             }
             return exerciseSession;

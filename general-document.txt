@@ -57,6 +57,13 @@ MATCH (n)-[r]-()
 WHERE id(n) = 5
 DELETE r, n
 
+
+// Delete specific relation
+START n=node(*) 
+MATCH (n)-[rel:HAS_ROLE]->(r) 
+WHERE n.name='Tamil' AND r.name='tester' 
+DELETE rel
+
 --------------------------
 
 MATCH (u:User {username: "mick"}), (mg:MuscleGroup {name: "Legs"}) 
@@ -98,6 +105,16 @@ MATCH (es)-[:FOR_WORKOUT_SESSION]->(ws:WorkoutSession)
 WHERE ws.id = '05233326-63b8-46d5-ba69-fd66def56d3d'
 RETURN ws.note, e.name, er.id, er.epochTimestamp, er.set, er.reps, er.value, er.unit
 ORDER BY er.epochTimestamp
+
+
+// Create relation if not exist
+MATCH (e:Exercise { id: '256ba0fd-1e4e-463c-84d5-058d665d80f9' }), (u:User { id: '2ffa1077-5d93-4ccc-a69c-c420f2e84e22' })
+WHERE NOT (u)-[:DOES_EXERCISE]-(e)
+CREATE (u)-[:DOES_EXERCISE { restTimeSeconds:120, unit:'' }]->(e)
+
+// Delete relation
+MATCH (e:Exercise { id: '256ba0fd-1e4e-463c-84d5-058d665d80f9' })-[rel:DOES_EXERCISE]-(u:User { id: '2ffa1077-5d93-4ccc-a69c-c420f2e84e22' }) 
+DELETE rel
 
 
 // Delete all

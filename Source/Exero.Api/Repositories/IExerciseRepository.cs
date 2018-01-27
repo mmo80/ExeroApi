@@ -11,6 +11,7 @@ namespace Exero.Api.Repositories
         Task<Exercise> Get(Guid id);
         Task<Exercise> Add(Exercise exercise, Guid exerciseGroupId);
         Task RelateExerciseToUser(Guid exerciseId, Guid userId);
+        Task UpdateExerciseToUserSettings(Guid exerciseId, Guid userId, int restTimeInSeconds, string unit);
         Task<Exercise> Update(Exercise exercise);
     }
 }

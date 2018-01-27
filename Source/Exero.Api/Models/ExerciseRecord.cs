@@ -10,6 +10,7 @@ namespace Exero.Api.Models
         public double Value { get; set; }
         public string Unit { get; set; }
         public bool DropSet { get; set; }
+        public string Note { get; set; }
 
         // from .Net 4.6 and above use DateTimeOffset.Now.ToUnixTimeSeconds() 
 

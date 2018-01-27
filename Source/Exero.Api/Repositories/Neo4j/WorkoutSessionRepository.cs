@@ -119,9 +119,10 @@ namespace Exero.Api.Repositories.Neo4j
                 item = new WorkoutSession()
                 {
                     Id = Guid.Parse(reader.Current[0].ToString()),
-                    Note = reader.Current[1].ToString(),
+                    Note = reader.Current[1]?.ToString(),
                     StartEpochTimestamp = double.Parse(reader.Current[2].ToString()),
-                    EndEpochTimestamp = double.Parse(reader.Current[3].ToString())
+                    EndEpochTimestamp = (reader.Current[3] != null) ? 
+                        double.Parse(reader.Current[3].ToString()) : 0
                 };
             }
             return item;

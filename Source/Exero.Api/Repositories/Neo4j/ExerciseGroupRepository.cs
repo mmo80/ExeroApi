@@ -21,7 +21,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (eg:ExerciseGroup)-[r:FOR_CATEGORY]->(c:Category) WHERE c.id = $id
+                    @"MATCH (eg:ExerciseGroup)-[r:FOR_CATEGORY]->(c:Category { id: $id })
                     RETURN eg.id, eg.name, eg.note",
                     new { id = categoryId.ToString() });
 
@@ -31,7 +31,7 @@ namespace Exero.Api.Repositories.Neo4j
                     {
                         Id = Guid.Parse(reader.Current[0].ToString()),
                         Name = reader.Current[1].ToString(),
-                        Note = reader.Current[2].ToString()
+                        Note = reader.Current[2]?.ToString()
                     });
                 }
             }
@@ -44,7 +44,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    "MATCH (eg:ExerciseGroup) WHERE eg.id = $id RETURN eg.id, eg.name, eg.note",
+                    "MATCH (eg:ExerciseGroup { id: $id }) RETURN eg.id, eg.name, eg.note",
                     new { id = id.ToString() }
                 );
                 item = await GetExerciseGroup(reader);
@@ -57,7 +57,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (c:Category) WHERE c.id = $categoryId
+                    @"MATCH (c:Category { id: $categoryId })
                     CREATE (eg:ExerciseGroup { id: $id, name: $name, note: $note }),
                     (eg)-[:FOR_CATEGORY]->(c)
                     RETURN eg.id, eg.name, eg.note",
@@ -80,7 +80,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (eg:ExerciseGroup) WHERE eg.id = $id 
+                    @"MATCH (eg:ExerciseGroup { id: $id }) 
                     SET eg.name = $name, eg.note = $note 
                     RETURN eg.id, eg.name, eg.note",
                     new { id = exerciseGroup.Id.ToString(), name = exerciseGroup.Name, note = exerciseGroup.Note }
@@ -100,7 +100,7 @@ namespace Exero.Api.Repositories.Neo4j
                 {
                     Id = Guid.Parse(reader.Current[0].ToString()),
                     Name = reader.Current[1].ToString(),
-                    Note = reader.Current[2].ToString()
+                    Note = reader.Current[2]?.ToString()
                 };
             }
             return item;

@@ -22,7 +22,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (e:Exercise)-[r:FOR_EXERCISE_GROUP]->(eg:ExerciseGroup) WHERE eg.id = $id
+                    @"MATCH (e:Exercise)-[r:FOR_EXERCISE_GROUP]->(eg:ExerciseGroup { id: $id })
                     RETURN e.id, e.name, e.note",
                     new { id = exerciseGroupId.ToString() });
 
@@ -45,7 +45,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    "MATCH (e:Exercise) WHERE e.id = $id RETURN e.id, e.name, e.note",
+                    "MATCH (e:Exercise { id = $id }) RETURN e.id, e.name, e.note",
                     new { id = id.ToString() }
                 );
                 item = await GetExercise(reader);
@@ -58,7 +58,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (eg:ExerciseGroup) WHERE eg.id = $exerciseGroupId
+                    @"MATCH (eg:ExerciseGroup { id: $exerciseGroupId })
                     CREATE (e:Exercise { id: $id, name: $name, note: $note }),
                     (e)-[:FOR_EXERCISE_GROUP]->(eg)
                     RETURN e.id, e.name, e.note",
@@ -77,24 +77,33 @@ namespace Exero.Api.Repositories.Neo4j
 
         public async Task RelateExerciseToUser(Guid exerciseId, Guid userId)
         {
-            // TODO: Check if relation already made!
-            // url: OPTIONAL MATCH https://stackoverflow.com/a/43349422
-            // url: https://stackoverflow.com/a/34839121
-            /*
-MATCH (a:User {name:"userA"}),(b:User {name:"userB"})
-WHERE NOT (a)-[:KNOWS]-(b)
-WITH a,b
-CREATE (c:User {name:"userC",id:rand()})
-CREATE (a)-[:KNOWS]->(c)
-CREATE (b)-[:KNOWS]->(c);
-             */
+            using (var session = _graphRepository.Driver.Session())
+            {
+                // Create relation if not exist
+                await session.RunAsync(
+                    @"MATCH (e:Exercise { id: $exerciseId }), (u:User { id: $userId })
+                    WHERE NOT (u)-[:DOES_EXERCISE]-(e)
+                    CREATE (u)-[:DOES_EXERCISE]->(e)", // { restTimeSeconds:120, unit:'' }
+                    new { exerciseId = exerciseId.ToString(), userId = userId.ToString() }
+                );
+            }
+        }
+
+        public async Task UpdateExerciseToUserSettings(
+            Guid exerciseId, Guid userId, int restTimeInSeconds, string unit)
+        {
             using (var session = _graphRepository.Driver.Session())
             {
                 await session.RunAsync(
-                    @"MATCH (e:Exercise { id = $exerciseId })
-                    MATCH (u:User { id = $userId })
-                    CREATE (u)-[:DOES_EXERCISE]->(e)",
-                    new { exerciseId = exerciseId.ToString(), userId = userId.ToString() }
+                    @"MATCH (e:Exercise { id: $exerciseId })-[r:DOES_EXERCISE]-(u:User { id: $userId })
+                    SET r.restTimeSeconds = $restTimeInSeconds, r.unit = $unit",
+                    new
+                    {
+                        exerciseId = exerciseId.ToString(),
+                        userId = userId.ToString(),
+                        restTimeInSeconds = restTimeInSeconds,
+                        unit = unit
+                    }
                 );
             }
         }
@@ -104,7 +113,7 @@ CREATE (b)-[:KNOWS]->(c);
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (e:Exercise) WHERE e.id = $id 
+                    @"MATCH (e:Exercise { id: $id  })
                     SET e.name = $name, e.note = $note 
                     RETURN e.id, e.name, e.note",
                     new { id = exercise.Id.ToString(), name = exercise.Name, note = exercise.Note }
@@ -124,7 +133,7 @@ CREATE (b)-[:KNOWS]->(c);
                 {
                     Id = Guid.Parse(reader.Current[0].ToString()),
                     Name = reader.Current[1].ToString(),
-                    Note = reader.Current[2].ToString()
+                    Note = reader.Current[2]?.ToString()
                 };
             }
             return item;

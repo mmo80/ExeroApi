@@ -39,7 +39,8 @@ namespace Exero.Api.Controllers
                     Value = r.Value,
                     Unit = r.Unit,
                     DropSet = r.DropSet,
-                    Datetime = r.Datetime
+                    Datetime = r.Datetime,
+                    Note = r.Note
                 })
             }));
         }
@@ -60,7 +61,8 @@ namespace Exero.Api.Controllers
                     Value = r.Value,
                     Unit = r.Unit,
                     DropSet = r.DropSet,
-                    Datetime = r.Datetime
+                    Datetime = r.Datetime,
+                    Note = r.Note
                 })
             });
         }
@@ -108,6 +110,7 @@ namespace Exero.Api.Controllers
             public string Unit { get; set; }
             public bool DropSet { get; set; }
             public DateTime Datetime { get; set; }
+            public string Note { get; set; }
         }
     }
 

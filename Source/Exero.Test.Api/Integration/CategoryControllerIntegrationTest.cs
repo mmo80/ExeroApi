@@ -23,8 +23,8 @@ namespace Exero.Test.Api.Integration
                 Neo4jSettings = new Neo4jSettings
                 {
                     Uri = "bolt://localhost:7687",
-                    User = "neo4j",
-                    Password = "TM3qYb5AXvNKZ9JpVr5c"
+                    User = "dev",
+                    Password = "dev2018"
                 }
             }));
         }
