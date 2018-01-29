@@ -1,5 +1,5 @@
 # Exero.Api
-Api for logging workout sessions. My first time building with ASP.NET Core 2.x and Neo4j, this repo is mostly for learning and testing.<br>
+Api for logging workout sessions. My first time building with ASP.NET Core 2.x and Neo4j 3.x.x, this repo is mostly for learning and testing.<br>
 <br>
 ## Things to come
 Auth0 integration<br>
