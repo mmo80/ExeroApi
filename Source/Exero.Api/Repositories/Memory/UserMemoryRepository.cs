@@ -23,7 +23,7 @@ namespace Exero.Api.Repositories.Memory
             });
         }
 
-        public Task<User> FindByEmail(string email)
+        public Task<User> ByEmail(string email)
         {
             return Task.Run(() =>
             {

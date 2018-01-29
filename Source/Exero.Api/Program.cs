@@ -14,8 +14,11 @@ namespace Exero.Api
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                //.UseUrls("http://*:5000")
+                .UseKestrel()
+                .UseIISIntegration()
+                .UseUrls("http://localhost:44343")
                 .UseStartup<Startup>()
+                //.UseApplicationInsights()
                 .Build();
     }
 }

@@ -38,7 +38,7 @@ namespace Exero.Api
 
             services.AddSingleton<IGraphRepository, GraphRepository>();
             services.AddSingleton<ICategoryRepository, CategoryRepository>();
-            services.AddSingleton<IUserRepository, UserMemoryRepository>();
+            services.AddSingleton<IUserRepository, UserRepository>();
             services.AddSingleton<IExerciseGroupRepository, ExerciseGroupRepository>();
             services.AddSingleton<IExerciseRepository, ExerciseRepository>();
             services.AddSingleton<IWorkoutSessionRepository, WorkoutSessionRepository>();

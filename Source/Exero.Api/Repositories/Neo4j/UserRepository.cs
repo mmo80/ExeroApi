@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
 using Neo4j.Driver.V1;
 
 namespace Exero.Api.Repositories.Neo4j
 {
-    public class UserRepository
+    public class UserRepository: IUserRepository
     {
         private readonly IGraphRepository _graphRepository;
 
@@ -30,7 +28,7 @@ namespace Exero.Api.Repositories.Neo4j
             return item;
         }
 
-        public async Task<User> FindByEmail(string email)
+        public async Task<User> ByEmail(string email)
         {
             User item;
             using (var session = _graphRepository.Driver.Session())
@@ -59,6 +57,7 @@ namespace Exero.Api.Repositories.Neo4j
             }
             return user;
         }
+
 
         private async Task<User> GetUser(IStatementResultCursor reader)
         {
