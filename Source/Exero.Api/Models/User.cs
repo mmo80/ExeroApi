@@ -10,6 +10,6 @@ namespace Exero.Api.Models
     public class User : BaseId
     {
         public string Email { get; set; }
-        public bool Disabled { get; set; }
+        public bool Blocked { get; set; }
     }
 }

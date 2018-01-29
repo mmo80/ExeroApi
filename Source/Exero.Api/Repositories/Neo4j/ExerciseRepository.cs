@@ -45,7 +45,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    "MATCH (e:Exercise { id = $id }) RETURN e.id, e.name, e.note",
+                    "MATCH (e:Exercise { id: $id }) RETURN e.id, e.name, e.note",
                     new { id = id.ToString() }
                 );
                 item = await GetExercise(reader);

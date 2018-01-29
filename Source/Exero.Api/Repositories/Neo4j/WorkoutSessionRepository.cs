@@ -22,7 +22,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (ws:WorkoutSession) WHERE ws.id = $id 
+                    @"MATCH (ws:WorkoutSession { id: $id }) 
                     RETURN ws.id, ws.note, ws.startEpochTimestamp, ws.endEpochTimestamp",
                     new { id = id.ToString() }
                 );
@@ -38,9 +38,8 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (ws:WorkoutSession)-[r:BY_USER]->(u:User) 
-                    WHERE u.id = $id and 
-                        ws.startEpochTimestamp >= $startEpochTimestamp and
+                    @"MATCH (ws:WorkoutSession)-[r:BY_USER]->(u:User { id: $id }) 
+                    WHERE ws.startEpochTimestamp >= $startEpochTimestamp and
                         ws.endEpochTimestamp <= $endEpochTimestamp
                     RETURN ws.id, ws.note, ws.startEpochTimestamp, ws.endEpochTimestamp
                     LIMIT $limit",
@@ -71,7 +70,7 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (u:User { id = $userId })
+                    @"MATCH (u:User { id: $userId })
                     CREATE (ws:WorkoutSession { id: $id, note: $note, startEpochTimestamp: $startEpochTimestamp, endEpochTimestamp: 0 }),
                     (ws)-[:BY_USER]->(u)
                     RETURN ws.id, ws.note, ws.startEpochTimestamp, ws.endEpochTimestamp",
@@ -93,9 +92,8 @@ namespace Exero.Api.Repositories.Neo4j
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
-                    @"MATCH (ws:WorkoutSession { id = $id }) 
-                    SET ws.name = $name, ws.note = $note, 
-                    ws.startEpochTimestamp = $startEpochTimestamp, ws.endEpochTimestamp = $endEpochTimestamp
+                    @"MATCH (ws:WorkoutSession { id: $id }) 
+                    SET ws.note = $note, ws.startEpochTimestamp = $startEpochTimestamp, ws.endEpochTimestamp = $endEpochTimestamp
                     RETURN ws.id, ws.note, ws.startEpochTimestamp, ws.endEpochTimestamp",
                     new
                     {
@@ -108,6 +106,22 @@ namespace Exero.Api.Repositories.Neo4j
                 workoutSession = await GetWorkoutSession(reader);
             }
             return workoutSession;
+        }
+
+        public async Task Remove(Guid id)
+        {
+            using (var session = _graphRepository.Driver.Session())
+            {
+                // Deletes node and all relationships to it.
+                await session.RunAsync(
+                    @"MATCH (ws:WorkoutSession { id: $id })<-[r]-(es:ExerciseSession)<-[r2]-(er:ExerciseRecord)
+                    DETACH DELETE ws, es, er",
+                    new
+                    {
+                        id = id.ToString()
+                    }
+                );
+            }
         }
 
 

@@ -11,5 +11,6 @@ namespace Exero.Api.Repositories
         Task<List<WorkoutSession>> ByUser(Guid userId, DateTime from, DateTime to, int limit = 31);
         Task<WorkoutSession> Add(WorkoutSession workoutSession, Guid userId);
         Task<WorkoutSession> Update(WorkoutSession workoutSession);
+        Task Remove(Guid id);
     }
 }

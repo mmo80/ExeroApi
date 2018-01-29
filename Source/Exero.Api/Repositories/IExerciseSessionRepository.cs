@@ -10,5 +10,7 @@ namespace Exero.Api.Repositories
         Task<IList<ExerciseSession>> ByWorkoutSession(Guid workoutSessionId);
         Task<ExerciseSession> Get(Guid id);
         Task<ExerciseSession> Add(ExerciseSession exerciseSession, Guid exerciseId, Guid workoutSessionId);
+        Task<ExerciseSession> Update(ExerciseSession exerciseSession);
+        Task Remove(Guid id);
     }
 }

@@ -10,7 +10,7 @@ namespace Exero.Api.Repositories
         Task<IEnumerable<Category>> GetAll(Guid userId);
         Task<Category> Get(Guid userId, Guid id);
         Task<Category> Add(Category category);
-        Task<Category> Update(Guid userId, Guid id, string name, string note);
+        Task<Category> Update(Guid userId, Category category);
         Task Remove(Guid userId, Guid id);
     }
 }

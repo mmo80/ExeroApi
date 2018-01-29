@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Common;
@@ -51,6 +52,8 @@ namespace Exero.Api.Controllers
         public async Task<IActionResult> Post(
             Guid userId, [FromBody] WorkoutSessionUpdateApi workoutSessionUpdate)
         {
+            // TODO: Check if user exists
+
             var workoutSession = new WorkoutSession
             {
                 Id = Guid.NewGuid(),
@@ -75,6 +78,9 @@ namespace Exero.Api.Controllers
         public async Task<IActionResult> Update(
             Guid userId, Guid id, [FromBody]WorkoutSessionUpdateApi workoutSessionUpdate)
         {
+            if (await _workoutSessionRepository.Get(id) == null)
+                return NotFound();
+
             var workoutSession = new WorkoutSession
             {
                 Id = id,
@@ -84,6 +90,16 @@ namespace Exero.Api.Controllers
             };
 
             await _workoutSessionRepository.Update(workoutSession);
+            return NoContent();
+        }
+
+        [HttpDelete("{userid:guid}/workoutsessions/{id:guid}")]
+        public async Task<IActionResult> Remove(Guid userId, Guid id)
+        {
+            if (await _workoutSessionRepository.Get(id) == null)
+                return NotFound();
+
+            await _workoutSessionRepository.Remove(id);
             return NoContent();
         }
     }
@@ -99,7 +115,10 @@ namespace Exero.Api.Controllers
     public class WorkoutSessionUpdateApi
     {
         public string Note { get; set; }
+
+        [Required]
         public DateTime StartDatetime { get; set; }
+
         public DateTime EndDatetime { get; set; }
     }
 }

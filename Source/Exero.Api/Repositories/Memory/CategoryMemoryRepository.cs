@@ -32,23 +32,23 @@ namespace Exero.Api.Repositories.Memory
             });
         }
 
-        public Task<Category> Add(Category exerciseCategory)
+        public Task<Category> Add(Category category)
         {
             return Task.Run(() =>
             {
-                _categories.Add(exerciseCategory);
-                return exerciseCategory;
+                _categories.Add(category);
+                return category;
             });
         }
 
-        public Task<Category> Update(Guid userId, Guid id, string name, string note)
+        public Task<Category> Update(Guid userId, Category category)
         {
             return Task.Run(() =>
             {
-                var category = _categories.First(c => c.Id == id); //  && c.User.Id == userId
-                if (!string.IsNullOrEmpty(name)) { category.Name = name; }
-                if (!string.IsNullOrEmpty(note)) { category.Note = note; }
-                return category;
+                var c = _categories.First(x => x.Id == category.Id); //  && c.User.Id == userId
+                if (!string.IsNullOrEmpty(category.Name)) { c.Name = category.Name; }
+                if (!string.IsNullOrEmpty(category.Note)) { c.Note = category.Note; }
+                return c;
             });
         }
 

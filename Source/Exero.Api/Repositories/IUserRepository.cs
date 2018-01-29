@@ -8,6 +8,6 @@ namespace Exero.Api.Repositories
     {
         Task<User> Get(Guid id);
         Task<User> FindByEmail(string email);
-        Task SetDisabled(Guid id, bool isDisabled);
+        Task<User> BlockUser(Guid id, bool block);
     }
 }

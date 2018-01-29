@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Exero.Api.Common;
 using Exero.Api.Models;
 using Exero.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -69,18 +71,21 @@ namespace Exero.Api.Controllers
 
         [HttpPost("{userid:guid}/exercisesessions")]
         public async Task<IActionResult> Post(
-            Guid userId, [FromBody] ExerciseSessionUpdateApi exerciseSessionUpdate)
+            Guid userId, [FromBody] ExerciseSessionAddApi exerciseSessionAdd)
         {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
             var exerciseSession = new ExerciseSession
             {
                 Id = Guid.NewGuid(),
-                Note = exerciseSessionUpdate.Note
+                Note = exerciseSessionAdd.Note
             };
 
-            var es = await _exerciseSessionRepository.Add(exerciseSession, exerciseSessionUpdate.ExerciseId,
-                exerciseSessionUpdate.WorkoutSessionId);
+            var es = await _exerciseSessionRepository.Add(exerciseSession, exerciseSessionAdd.ExerciseId,
+                exerciseSessionAdd.WorkoutSessionId);
 
-            await _exerciseRepository.RelateExerciseToUser(exerciseSessionUpdate.ExerciseId, userId);
+            await _exerciseRepository.RelateExerciseToUser(exerciseSessionAdd.ExerciseId, userId);
 
             return CreatedAtRoute("GetExerciseSession",
                 new { Controller = "ExerciseSession", userId, id = es.Id },
@@ -91,6 +96,33 @@ namespace Exero.Api.Controllers
                     ExerciseName = es.ExerciseName,
                     Records = new List<ExerciseSessionApi.ExerciseRecord>()
                 });
+        }
+
+        [HttpPut("{userid:guid}/exercisesessions/{id:guid}")]
+        public async Task<IActionResult> Update(
+            Guid userId, Guid id, [FromBody]ExerciseSessionUpdateApi exerciseSessionUpdate)
+        {
+            if (await _exerciseSessionRepository.Get(id) == null)
+                return NotFound();
+
+            var exerciseSession = new ExerciseSession
+            {
+                Id = id,
+                Note = exerciseSessionUpdate.Note
+            };
+
+            await _exerciseSessionRepository.Update(exerciseSession);
+            return NoContent();
+        }
+
+        [HttpDelete("{userid:guid}/exercisesessions/{id:guid}")]
+        public async Task<IActionResult> Remove(Guid userId, Guid id)
+        {
+            if (await _exerciseSessionRepository.Get(id) == null)
+                return NotFound();
+
+            await _exerciseSessionRepository.Remove(id);
+            return NoContent();
         }
     }
 
@@ -114,11 +146,19 @@ namespace Exero.Api.Controllers
         }
     }
 
+    public class ExerciseSessionAddApi
+    {
+        [Required]
+        public Guid ExerciseId { get; set; }
+
+        [Required]
+        public Guid WorkoutSessionId { get; set; }
+
+        public string Note { get; set; }
+    }
+
     public class ExerciseSessionUpdateApi
     {
-        public Guid ExerciseId { get; set; }
-        public Guid WorkoutSessionId { get; set; }
         public string Note { get; set; }
-        public string ExerciseName { get; set; }
     }
 }

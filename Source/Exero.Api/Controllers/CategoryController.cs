@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
@@ -39,6 +39,9 @@ namespace Exero.Api.Controllers
         [HttpPost("{userid:guid}/categories")]
         public async Task<IActionResult> Post(Guid userId, [FromBody]CategoryUpdateApi categoryUpdate)
         {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
             var category = new Category
             {
                 Id = Guid.NewGuid(),
@@ -56,19 +59,32 @@ namespace Exero.Api.Controllers
         public async Task<IActionResult> Update(
             Guid userId, Guid id, [FromBody]CategoryUpdateApi categoryUpdate)
         {
-            await _categoryRepository.Update(userId, id, categoryUpdate.Name, categoryUpdate.Note);
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            if (!await CategoryExists(userId, id))
+                return NotFound();
+
+            await _categoryRepository.Update(userId, new Category()
+                { Id = id, Name = categoryUpdate.Name, Note = categoryUpdate.Note });
             return NoContent();
         }
 
         [HttpDelete("{userid:guid}/categories/{id:guid}")]
         public async Task<IActionResult> Delete(Guid userId, Guid id)
         {
-            var category = await _categoryRepository.Get(userId, id);
-            if (category == null)
+            if (!await CategoryExists(userId, id))
                 return NotFound();
 
             await _categoryRepository.Remove(userId, id);
             return NoContent();
+        }
+
+
+        private async Task<bool> CategoryExists(Guid userId, Guid id)
+        {
+            var category = await _categoryRepository.Get(userId, id);
+            return (category != null);
         }
     }
 
@@ -76,6 +92,8 @@ namespace Exero.Api.Controllers
     public class CategoryUpdateApi
     {
         public string Note { get; set; }
+
+        [Required]
         public string Name { get; set; }
     }
 

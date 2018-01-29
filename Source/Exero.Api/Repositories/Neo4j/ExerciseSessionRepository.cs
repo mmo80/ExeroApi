@@ -100,6 +100,41 @@ namespace Exero.Api.Repositories.Neo4j
             return exerciseSession;
         }
 
+        public async Task<ExerciseSession> Update(ExerciseSession exerciseSession)
+        {
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                        @"MATCH (es:ExerciseSession { id: $id })-[:FOR_EXERCISE]->(e:Exercise)
+                        SET es.note = $note
+                        RETURN es.id, es.note, e.name",
+                    new
+                    {
+                        id = exerciseSession.Id.ToString(),
+                        note = exerciseSession.Note
+                    }
+                );
+                exerciseSession = await GetExerciseSession(reader);
+            }
+            return exerciseSession;
+        }
+
+        public async Task Remove(Guid id)
+        {
+            using (var session = _graphRepository.Driver.Session())
+            {
+                // Deletes node and all relationships to it.
+                await session.RunAsync(
+                    @"MATCH (es:ExerciseSession { id: $id })<-[r]-(er:ExerciseRecord)
+                    DETACH DELETE es, er",
+                    new
+                    {
+                        id = id.ToString()
+                    }
+                );
+            }
+        }
+
 
         private async Task<ExerciseSession> GetExerciseSession(IStatementResultCursor reader)
         {

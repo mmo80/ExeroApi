@@ -31,12 +31,13 @@ namespace Exero.Api.Repositories.Memory
             });
         }
 
-        public Task SetDisabled(Guid id, bool isDisabled)
+        public Task<User> BlockUser(Guid id, bool block)
         {
             return Task.Run(() =>
             {
                 var user = _users.First(x => x.Id == id);
-                user.Disabled = isDisabled;
+                user.Blocked = block;
+                return user;
             });
         }
     }

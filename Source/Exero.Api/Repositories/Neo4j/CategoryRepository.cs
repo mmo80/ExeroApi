@@ -64,15 +64,14 @@ namespace Exero.Api.Repositories.Neo4j
             return category;
         }
 
-        public async Task<Category> Update(Guid userId, Guid id, string name, string note)
+        public async Task<Category> Update(Guid userId, Category category)
         {
-            Category category;
             using (var session = _graphRepository.Driver.Session())
             {
                 var reader = await session.RunAsync(
                     @"MATCH (c:Category { id: $id }) SET c.name = $name, c.note = $note 
                     RETURN c.id, c.name, c.note",
-                    new { id = id.ToString(), name = name, note = note }
+                    new { id = category.Id.ToString(), name = category.Name, note = category.Note }
                 );
                 category = await GetCategory(reader);
             }

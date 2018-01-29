@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Common;
 using Exero.Api.Models;
 using Exero.Api.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Exero.Api.Controllers
@@ -21,19 +20,23 @@ namespace Exero.Api.Controllers
             _exerciseRecordRepository = exerciseRecordRepository;
         }
 
-        [HttpPost("{userid:guid}/exercisesessions/{exercisesessionid:guid}/record")]
+        [HttpPost("{userid:guid}/exercisesessions/{exercisesessionid:guid}/records")]
         public async Task<IActionResult> Post(
-            Guid userId, Guid exerciseSessionId, [FromBody] ExerciseRecordUpdateApi exerciseRecordUpdateApi)
+            Guid userId, Guid exerciseSessionId, [FromBody] ExerciseRecordAddApi exerciseRecordAddApi)
         {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
             var exerciseRecord = new ExerciseRecord
             {
                 Id = Guid.NewGuid(),
-                Set = exerciseRecordUpdateApi.Set,
-                Reps = exerciseRecordUpdateApi.Reps,
-                Value = exerciseRecordUpdateApi.Value,
-                Unit = exerciseRecordUpdateApi.Unit,
-                DropSet = exerciseRecordUpdateApi.DropSet,
-                EpochTimestamp = exerciseRecordUpdateApi.Datetime.ToEpoch()
+                Set = exerciseRecordAddApi.Set,
+                Reps = exerciseRecordAddApi.Reps,
+                Value = exerciseRecordAddApi.Value,
+                Unit = exerciseRecordAddApi.Unit,
+                DropSet = exerciseRecordAddApi.DropSet,
+                EpochTimestamp = exerciseRecordAddApi.Datetime.ToEpoch(),
+                Note = exerciseRecordAddApi.Note
             };
 
             var er = await _exerciseRecordRepository.Add(exerciseRecord, exerciseSessionId);
@@ -48,8 +51,43 @@ namespace Exero.Api.Controllers
                     Value = er.Value,
                     Unit = er.Unit,
                     DropSet = er.DropSet,
-                    Datetime = er.Datetime
+                    Datetime = er.Datetime,
+                    Note = er.Note
                 });
+        }
+
+        [HttpPut("{userid:guid}/exercisesessions/{exercisesessionid:guid}/records/{id:guid}")]
+        public async Task<IActionResult> Update(
+            Guid userId, Guid exerciseSessionId, Guid id, [FromBody] ExerciseRecordAddApi exerciseRecordAddApi)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var exerciseRecord = new ExerciseRecord
+            {
+                Id = Guid.NewGuid(),
+                Set = exerciseRecordAddApi.Set,
+                Reps = exerciseRecordAddApi.Reps,
+                Value = exerciseRecordAddApi.Value,
+                Unit = exerciseRecordAddApi.Unit,
+                DropSet = exerciseRecordAddApi.DropSet,
+                EpochTimestamp = exerciseRecordAddApi.Datetime.ToEpoch(),
+                Note = exerciseRecordAddApi.Note
+            };
+
+            await _exerciseRecordRepository.Update(exerciseRecord);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{userid:guid}/exercisesessions/{exercisesessionid:guid}/records/{id:guid}")]
+        public async Task<IActionResult> Delete(Guid userId, Guid exerciseSessionId, Guid id)
+        {
+            if (await _exerciseRecordRepository.Get(id) == null)
+                return NotFound();
+
+            await _exerciseRecordRepository.Remove(id, exerciseSessionId);
+            return NoContent();
         }
     }
 
@@ -62,15 +100,29 @@ namespace Exero.Api.Controllers
         public string Unit { get; set; }
         public bool DropSet { get; set; }
         public DateTime Datetime { get; set; }
+        public string Note { get; set; }
     }
 
-    public class ExerciseRecordUpdateApi
+    public class ExerciseRecordAddApi
     {
+        [Required]
         public string Set { get; set; }
+
+        [Required]
         public Int64 Reps { get; set; }
+
+        [Required]
         public double Value { get; set; }
+
+        [Required]
         public string Unit { get; set; }
+
+        [Required]
         public bool DropSet { get; set; }
+
+        [Required]
         public DateTime Datetime { get; set; }
+
+        public string Note { get; set; }
     }
 }
