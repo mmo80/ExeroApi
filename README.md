@@ -2,7 +2,7 @@
 Api for logging workout sessions. My first time building with ASP.NET Core 2.x and Neo4j, this repo is mostly for learning and testing.<br>
 <br>
 ## Things to come
-OAuth integration<br>
+Auth0 integration<br>
 Android, iOS clients<br>
 <br>
 ## Status
