@@ -1,5 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Exero.Api.Models;
+using Exero.Api.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -12,10 +15,12 @@ namespace Exero.Api.Controllers
     public class TokenController : Controller
     {
         private readonly Auth0 _auth0;
+        private readonly IUserRepository _userRepository;
 
-        public TokenController(IOptions<ExeroSettings> settings)
+        public TokenController(IOptions<ExeroSettings> settings, IUserRepository userRepository)
         {
             _auth0 = settings.Value.Auth0;
+            _userRepository = userRepository;
         }
 
         [HttpPost("login"), AllowAnonymous]
@@ -67,7 +72,18 @@ namespace Exero.Api.Controllers
                 }
             });
             var result = await GetResponse<SignupResultApi>(request);
-
+            if (result.ErrorException != null)
+            {
+                return BadRequest($"Auth0 responded: {result.Content}");
+            }
+            
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Email = loginApi.Email
+            };
+            await _userRepository.Add(user);
+            
             return Ok(result.Data);
         }
 

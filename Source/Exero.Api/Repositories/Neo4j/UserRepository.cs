@@ -58,6 +58,23 @@ namespace Exero.Api.Repositories.Neo4j
             return user;
         }
 
+        public async Task<User> Add(User user)
+        {
+            using (var session = _graphRepository.Driver.Session())
+            {
+                var reader = await session.RunAsync(
+                    @"CREATE (u:User { id: $id, email: $email })
+                    RETURN u.id, u.email, u.blocked",
+                    new
+                    {
+                        id = user.Id.ToString(),
+                        name = user.Email
+                    }
+                );
+                user = await GetUser(reader);
+            }
+            return user;
+        }
 
         private async Task<User> GetUser(IStatementResultCursor reader)
         {

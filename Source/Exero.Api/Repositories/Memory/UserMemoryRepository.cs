@@ -40,5 +40,14 @@ namespace Exero.Api.Repositories.Memory
                 return user;
             });
         }
+
+        public Task<User> Add(User user)
+        {
+            return Task.Run(() =>
+            {
+                _users.Add(user);
+                return user;
+            });
+        }
     }
 }

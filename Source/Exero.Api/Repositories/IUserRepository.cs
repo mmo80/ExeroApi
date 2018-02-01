@@ -9,5 +9,6 @@ namespace Exero.Api.Repositories
         Task<User> Get(Guid id);
         Task<User> ByEmail(string email);
         Task<User> BlockUser(Guid id, bool block);
+        Task<User> Add(User user);
     }
 }
