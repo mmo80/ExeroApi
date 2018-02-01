@@ -58,6 +58,8 @@ namespace Exero.Api.Controllers
         [HttpPost("register"), AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] LoginApi loginApi)
         {
+            Guid userId = Guid.NewGuid();
+
             var request = GetRequest("dbconnections/signup");
             request.AddJsonBody(new
             {
@@ -67,8 +69,8 @@ namespace Exero.Api.Controllers
                 connection = _auth0.ConnectionDb,
                 user_metadata = new
                 {
-                    exero_user_id = "exero", // TODO: userId Guid?
-                    admin = false
+                    exero_user_id = userId.ToString(),
+                    //admin = false
                 }
             });
             var result = await GetResponse<SignupResultApi>(request);
@@ -79,7 +81,7 @@ namespace Exero.Api.Controllers
             
             var user = new User
             {
-                Id = Guid.NewGuid(),
+                Id = userId,
                 Email = loginApi.Email
             };
             await _userRepository.Add(user);
