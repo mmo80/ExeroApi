@@ -68,7 +68,7 @@ namespace Exero.Api.Repositories.Neo4j
                     new
                     {
                         id = user.Id.ToString(),
-                        name = user.Email
+                        email = user.Email
                     }
                 );
                 user = await GetUser(reader);
