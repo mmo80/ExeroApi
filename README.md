@@ -1,13 +1,17 @@
 # Exero.Api
-Api for logging workout sessions. My first time building with ASP.NET Core 2.x and Neo4j 3.x.x, this repo is mostly for learning and testing.<br>
-<br>
-## Things to come
-Auth0 integration<br>
-Android, iOS clients<br>
-<br>
+Api for logging workout sessions.
+
+**Using**
+- ASP.NET Core 2.x
+- Neo4j 3.x.x
+- OAuth 2.0 with [Auth0](https://auth0.com/)
+
 ## Status
-Still work in progress<br>
-<br>
+Still work in progress
+
+## Things to come
+Android, iOS clients
+
 ## Tools
-Visual Studio Community 2017<br>
-Insomnia
+- Visual Studio Community 2017
+- Insomnia

@@ -11,15 +11,15 @@ namespace Exero.Api.Repositories.Neo4j
 
     public class GraphRepository : IGraphRepository
     {
-        private Neo4jSettings _neo4jSettings;
+        private readonly Api.Neo4j _neo4j;
 
         public GraphRepository(IOptions<ExeroSettings> settings)
         {
-            _neo4jSettings = settings.Value.Neo4jSettings;
+            _neo4j = settings.Value.Neo4j;
 
-            var url = _neo4jSettings.Uri;
-            var user = _neo4jSettings.User;
-            var password = _neo4jSettings.Password;
+            var url = _neo4j.Uri;
+            var user = _neo4j.User;
+            var password = _neo4j.Password;
 
             Driver = GraphDatabase.Driver(url, AuthTokens.Basic(user, password));
         }

@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
 using Exero.Api.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Exero.Api.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
-    [Route("api/user")]
+    [Route("api")]
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;
@@ -19,25 +21,25 @@ namespace Exero.Api.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        [HttpGet("{userid:guid}/categories")]
-        public async Task<IActionResult> GetCategories(Guid userId)
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategories()
         {
-            var categories = await _categoryRepository.GetAll(userId);
+            var categories = await _categoryRepository.GetAll();
             return Ok(categories.Select(x => new CategoryApi { Id = x.Id, Name = x.Name, Note = x.Note }));
         }
 
-        [HttpGet("{userid:guid}/categories/{id:guid}", Name = "GetCategory")]
-        public async Task<IActionResult> GetCategory(Guid userId, Guid id)
+        [HttpGet("categories/{id:guid}", Name = "GetCategory")]
+        public async Task<IActionResult> GetCategory(Guid id)
         {
-            var category = await _categoryRepository.Get(userId, id);
+            var category = await _categoryRepository.Get(id);
             if (category == null)
                 return NotFound();
             
             return Ok(new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note });
         }
 
-        [HttpPost("{userid:guid}/categories")]
-        public async Task<IActionResult> Post(Guid userId, [FromBody]CategoryUpdateApi categoryUpdate)
+        [HttpPost("categories")]
+        public async Task<IActionResult> Post([FromBody]CategoryUpdateApi categoryUpdate)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -51,39 +53,39 @@ namespace Exero.Api.Controllers
             await _categoryRepository.Add(category);
 
             return CreatedAtRoute("GetCategory", 
-                new { Controller = "Category", userId, id = category.Id }, 
+                new { Controller = "Category", id = category.Id }, 
                 new CategoryApi { Id = category.Id, Name = category.Name, Note = category.Note });
         }
 
-        [HttpPut("{userid:guid}/categories/{id:guid}")]
+        [HttpPut("categories/{id:guid}")]
         public async Task<IActionResult> Update(
-            Guid userId, Guid id, [FromBody]CategoryUpdateApi categoryUpdate)
+            Guid id, [FromBody]CategoryUpdateApi categoryUpdate)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            if (!await CategoryExists(userId, id))
+            if (!await CategoryExists(id))
                 return NotFound();
 
-            await _categoryRepository.Update(userId, new Category()
+            await _categoryRepository.Update(new Category()
                 { Id = id, Name = categoryUpdate.Name, Note = categoryUpdate.Note });
             return NoContent();
         }
 
-        [HttpDelete("{userid:guid}/categories/{id:guid}")]
-        public async Task<IActionResult> Delete(Guid userId, Guid id)
+        [HttpDelete("categories/{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            if (!await CategoryExists(userId, id))
+            if (!await CategoryExists(id))
                 return NotFound();
 
-            await _categoryRepository.Remove(userId, id);
+            await _categoryRepository.Remove(id);
             return NoContent();
         }
 
 
-        private async Task<bool> CategoryExists(Guid userId, Guid id)
+        private async Task<bool> CategoryExists(Guid id)
         {
-            var category = await _categoryRepository.Get(userId, id);
+            var category = await _categoryRepository.Get(id);
             return (category != null);
         }
     }

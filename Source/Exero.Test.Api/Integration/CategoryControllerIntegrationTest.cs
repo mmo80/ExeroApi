@@ -20,7 +20,7 @@ namespace Exero.Test.Api.Integration
         {
             return new GraphRepository(Options.Create(new ExeroSettings
             {
-                Neo4jSettings = new Neo4jSettings
+                Neo4j = new Exero.Api.Neo4j
                 {
                     Uri = "bolt://localhost:7687",
                     User = "dev",
@@ -35,7 +35,7 @@ namespace Exero.Test.Api.Integration
         {
             var controller = new CategoryController(new CategoryRepository(GraphRepo()));
             
-            IActionResult actionResult = await controller.GetCategories(_userId);
+            IActionResult actionResult = await controller.GetCategories();
             Assert.NotNull(actionResult);
 
             var result = actionResult as OkObjectResult;
@@ -51,7 +51,7 @@ namespace Exero.Test.Api.Integration
         {
             var controller = new CategoryController(new CategoryRepository(GraphRepo()));
 
-            IActionResult actionResult = await controller.GetCategory(_userId, _categoryIdNotFound);
+            IActionResult actionResult = await controller.GetCategory(_categoryIdNotFound);
             Assert.NotNull(actionResult);
 
             var result = actionResult as NotFoundResult;
@@ -64,7 +64,7 @@ namespace Exero.Test.Api.Integration
         {
             var controller = new CategoryController(new CategoryRepository(GraphRepo()));
 
-            IActionResult actionResult = await controller.GetCategory(_userId, _categoryId);
+            IActionResult actionResult = await controller.GetCategory(_categoryId);
             Assert.NotNull(actionResult);
 
             var result = actionResult as OkObjectResult;

@@ -7,10 +7,10 @@ namespace Exero.Api.Repositories
 {
     public interface ICategoryRepository
     {
-        Task<IEnumerable<Category>> GetAll(Guid userId);
-        Task<Category> Get(Guid userId, Guid id);
+        Task<IEnumerable<Category>> GetAll();
+        Task<Category> Get(Guid id);
         Task<Category> Add(Category category);
-        Task<Category> Update(Guid userId, Category category);
-        Task Remove(Guid userId, Guid id);
+        Task<Category> Update(Category category);
+        Task Remove(Guid id);
     }
 }

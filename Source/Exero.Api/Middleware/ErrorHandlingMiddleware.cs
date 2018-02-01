@@ -10,8 +10,6 @@ using Newtonsoft.Json;
 namespace Exero.Api.Middleware
 {
     // Url: https://stackoverflow.com/a/38935583
-
-    // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
     public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate _next;
@@ -21,7 +19,7 @@ namespace Exero.Api.Middleware
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context /* other scoped dependencies */)
+        public async Task Invoke(HttpContext context)
         {
             try
             {
@@ -35,20 +33,24 @@ namespace Exero.Api.Middleware
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var code = HttpStatusCode.InternalServerError; // 500 if unexpected
+            var code = HttpStatusCode.InternalServerError; // 500
 
             //if (exception is MyNotFoundException) code = HttpStatusCode.NotFound;
             //else if (exception is MyUnauthorizedException) code = HttpStatusCode.Unauthorized;
             //else if (exception is MyException) code = HttpStatusCode.BadRequest;
 
-            var result = JsonConvert.SerializeObject(new { error = exception.Message });
+#if DEBUG
+            var result = JsonConvert.SerializeObject(new { error = exception.ToString() });
+#else
+            var result = JsonConvert.SerializeObject(new { error = "An error occured." });
+#endif
+
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
             return context.Response.WriteAsync(result);
         }
     }
 
-    // Extension method used to add the middleware to the HTTP request pipeline.
     public static class ErrorHandlingMiddlewareExtensions
     {
         public static IApplicationBuilder UseErrorHandlingMiddleware(this IApplicationBuilder builder)

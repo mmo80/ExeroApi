@@ -15,7 +15,7 @@ namespace Exero.Api.Repositories.Neo4j
             _graphRepository = graphRepository;
         }
 
-        public async Task<IEnumerable<Category>> GetAll(Guid userId)
+        public async Task<IEnumerable<Category>> GetAll()
         {
             var list = new List<Category>();
             using (var session = _graphRepository.Driver.Session())
@@ -36,7 +36,7 @@ namespace Exero.Api.Repositories.Neo4j
             return list;
         }
 
-        public async Task<Category> Get(Guid userId, Guid id)
+        public async Task<Category> Get(Guid id)
         {
             Category category;
             using (var session = _graphRepository.Driver.Session())
@@ -64,7 +64,7 @@ namespace Exero.Api.Repositories.Neo4j
             return category;
         }
 
-        public async Task<Category> Update(Guid userId, Category category)
+        public async Task<Category> Update(Category category)
         {
             using (var session = _graphRepository.Driver.Session())
             {
@@ -78,7 +78,7 @@ namespace Exero.Api.Repositories.Neo4j
             return category;
         }
 
-        public async Task Remove(Guid userId, Guid id)
+        public async Task Remove(Guid id)
         {
             using (var session = _graphRepository.Driver.Session())
             {

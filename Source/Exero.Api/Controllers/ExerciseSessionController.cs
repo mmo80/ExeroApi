@@ -3,30 +3,35 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Exero.Api.Common;
 using Exero.Api.Models;
 using Exero.Api.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ValueType = Exero.Api.Common.ValueType;
 
 namespace Exero.Api.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
-    [Route("api/user")]
+    [Route("api")]
     public class ExerciseSessionController : Controller
     {
         private readonly IExerciseSessionRepository _exerciseSessionRepository;
         private readonly IExerciseRepository _exerciseRepository;
+        private readonly IUserRepository _userRepository;
 
         public ExerciseSessionController(IExerciseSessionRepository exerciseSessionRepository,
-            IExerciseRepository exerciseRepository)
+            IExerciseRepository exerciseRepository,
+            IUserRepository userRepository)
         {
             _exerciseSessionRepository = exerciseSessionRepository;
             _exerciseRepository = exerciseRepository;
+            _userRepository = userRepository;
         }
 
-        [HttpGet("{userid:guid}/exercisesessions")]
+        [HttpGet("exercisesessions")]
         public async Task<IActionResult> GetExerciseSessions(
-            Guid userId, [FromQuery] Guid workoutSessionId)
+            [FromQuery] Guid workoutSessionId)
         {
             var list = await _exerciseSessionRepository.ByWorkoutSession(workoutSessionId);
             return Ok(list.Select(x => new ExerciseSessionApi
@@ -47,8 +52,8 @@ namespace Exero.Api.Controllers
             }));
         }
 
-        [HttpGet("{userid:guid}/exercisesessions/{id:guid}", Name = "GetExerciseSession")]
-        public async Task<IActionResult> GetExerciseSession(Guid userId, Guid id)
+        [HttpGet("exercisesessions/{id:guid}", Name = "GetExerciseSession")]
+        public async Task<IActionResult> GetExerciseSession(Guid id)
         {
             var item = await _exerciseSessionRepository.Get(id);
             return Ok(new ExerciseSessionApi
@@ -69,9 +74,9 @@ namespace Exero.Api.Controllers
             });
         }
 
-        [HttpPost("{userid:guid}/exercisesessions")]
+        [HttpPost("exercisesessions")]
         public async Task<IActionResult> Post(
-            Guid userId, [FromBody] ExerciseSessionAddApi exerciseSessionAdd)
+            [FromBody] ExerciseSessionAddApi exerciseSessionAdd)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -82,13 +87,17 @@ namespace Exero.Api.Controllers
                 Note = exerciseSessionAdd.Note
             };
 
+            var user = await _userRepository.ByEmail(Common.ClaimsHelper.GetUserValue(User, ValueType.email));
+            if (user.Id == Guid.Empty)
+                return BadRequest("No User Found.");
+
             var es = await _exerciseSessionRepository.Add(exerciseSession, exerciseSessionAdd.ExerciseId,
                 exerciseSessionAdd.WorkoutSessionId);
 
-            await _exerciseRepository.RelateExerciseToUser(exerciseSessionAdd.ExerciseId, userId);
+            await _exerciseRepository.RelateExerciseToUser(exerciseSessionAdd.ExerciseId, user.Id);
 
             return CreatedAtRoute("GetExerciseSession",
-                new { Controller = "ExerciseSession", userId, id = es.Id },
+                new { Controller = "ExerciseSession", id = es.Id },
                 new ExerciseSessionApi
                 {
                     Id = es.Id,
@@ -98,9 +107,9 @@ namespace Exero.Api.Controllers
                 });
         }
 
-        [HttpPut("{userid:guid}/exercisesessions/{id:guid}")]
+        [HttpPut("exercisesessions/{id:guid}")]
         public async Task<IActionResult> Update(
-            Guid userId, Guid id, [FromBody]ExerciseSessionUpdateApi exerciseSessionUpdate)
+            Guid id, [FromBody]ExerciseSessionUpdateApi exerciseSessionUpdate)
         {
             if (await _exerciseSessionRepository.Get(id) == null)
                 return NotFound();
@@ -115,8 +124,8 @@ namespace Exero.Api.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{userid:guid}/exercisesessions/{id:guid}")]
-        public async Task<IActionResult> Remove(Guid userId, Guid id)
+        [HttpDelete("exercisesessions/{id:guid}")]
+        public async Task<IActionResult> Remove(Guid id)
         {
             if (await _exerciseSessionRepository.Get(id) == null)
                 return NotFound();

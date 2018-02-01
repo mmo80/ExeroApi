@@ -15,7 +15,7 @@ namespace Exero.Api.Repositories.Memory
             _categories = InMemoryData.Categories;
         }
 
-        public Task<IEnumerable<Category>> GetAll(Guid userId)
+        public Task<IEnumerable<Category>> GetAll()
         {
             //return _categories.AsEnumerable();
             return Task.Run(() =>
@@ -24,7 +24,7 @@ namespace Exero.Api.Repositories.Memory
             });
         }
 
-        public Task<Category> Get(Guid userId, Guid id)
+        public Task<Category> Get(Guid id)
         {
             return Task.Run(() =>
             {
@@ -41,7 +41,7 @@ namespace Exero.Api.Repositories.Memory
             });
         }
 
-        public Task<Category> Update(Guid userId, Category category)
+        public Task<Category> Update(Category category)
         {
             return Task.Run(() =>
             {
@@ -52,7 +52,7 @@ namespace Exero.Api.Repositories.Memory
             });
         }
 
-        public Task Remove(Guid userId, Guid id)
+        public Task Remove(Guid id)
         {
             var category = _categories.First(c => c.Id == id); //  && c.User.Id == userId
             _categories.Remove(category);
