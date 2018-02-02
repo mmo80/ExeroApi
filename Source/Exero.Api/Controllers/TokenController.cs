@@ -76,7 +76,8 @@ namespace Exero.Api.Controllers
             var result = await GetResponse<SignupResultApi>(request);
             if (result.ErrorException != null)
             {
-                return BadRequest($"Auth0 responded: {result.Content}");
+                return BadRequest($"Auth0 responded: {result.Content}. {result.ErrorException}.");
+                //throw result.ErrorException;
             }
             
             var user = new User

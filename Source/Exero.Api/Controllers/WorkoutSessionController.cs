@@ -13,27 +13,25 @@ namespace Exero.Api.Controllers
     [Authorize]
     [Produces("application/json")]
     [Route("api")]
-    public class WorkoutSessionController : Controller
+    public class WorkoutSessionController : BaseController
     {
         private readonly IWorkoutSessionRepository _workoutSessionRepository;
-        private readonly IUserRepository _userRepository;
 
         public WorkoutSessionController(IWorkoutSessionRepository workoutSessionRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository) : base(userRepository)
         {
             _workoutSessionRepository = workoutSessionRepository;
-            _userRepository = userRepository;
         }
 
         [HttpGet("workoutsessions")]
         public async Task<IActionResult> GetWorkoutSessions(
             [FromQuery] DateTime from, [FromQuery] DateTime to, [FromQuery] int limit = 31)
         {
-            var user = await _userRepository.ByEmail(Common.ClaimsHelper.GetUserValue(User, Common.ValueType.email));
-            if (user.Id == Guid.Empty)
+            var userResult = await CheckUser();
+            if (userResult.NotExist)
                 return BadRequest("No User Found.");
 
-            var list = await _workoutSessionRepository.ByUser(user.Id, from, to, limit);
+            var list = await _workoutSessionRepository.ByUser(userResult.User.Id, from, to, limit);
             return Ok(list.Select(x => new WorkoutSessionApi
             {
                 Id = x.Id,
@@ -67,11 +65,11 @@ namespace Exero.Api.Controllers
                 StartEpochTimestamp = workoutSessionUpdate.StartDatetime.ToEpoch()
             };
 
-            var user = await _userRepository.ByEmail(Common.ClaimsHelper.GetUserValue(User, Common.ValueType.email));
-            if (user.Id == Guid.Empty)
+            var userResult = await CheckUser();
+            if (userResult.NotExist)
                 return BadRequest("No User Found.");
 
-            var ws = await _workoutSessionRepository.Add(workoutSession, user.Id);
+            var ws = await _workoutSessionRepository.Add(workoutSession, userResult.User.Id);
 
             return CreatedAtRoute("GetWorkoutSession",
                 new { Controller = "WorkoutSession", id = ws.Id },

@@ -11,7 +11,6 @@ namespace Exero.Api.Common
         }
     }
 
-
     public enum ValueType
     {
         email,

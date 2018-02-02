@@ -14,19 +14,17 @@ namespace Exero.Api.Controllers
     [Authorize]
     [Produces("application/json")]
     [Route("api")]
-    public class ExerciseSessionController : Controller
+    public class ExerciseSessionController : BaseController
     {
         private readonly IExerciseSessionRepository _exerciseSessionRepository;
         private readonly IExerciseRepository _exerciseRepository;
-        private readonly IUserRepository _userRepository;
 
         public ExerciseSessionController(IExerciseSessionRepository exerciseSessionRepository,
             IExerciseRepository exerciseRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository) : base(userRepository)
         {
             _exerciseSessionRepository = exerciseSessionRepository;
             _exerciseRepository = exerciseRepository;
-            _userRepository = userRepository;
         }
 
         [HttpGet("exercisesessions")]
@@ -87,14 +85,14 @@ namespace Exero.Api.Controllers
                 Note = exerciseSessionAdd.Note
             };
 
-            var user = await _userRepository.ByEmail(Common.ClaimsHelper.GetUserValue(User, ValueType.email));
-            if (user.Id == Guid.Empty)
+            var userResult = await CheckUser();
+            if (userResult.NotExist)
                 return BadRequest("No User Found.");
 
             var es = await _exerciseSessionRepository.Add(exerciseSession, exerciseSessionAdd.ExerciseId,
                 exerciseSessionAdd.WorkoutSessionId);
 
-            await _exerciseRepository.RelateExerciseToUser(exerciseSessionAdd.ExerciseId, user.Id);
+            await _exerciseRepository.RelateExerciseToUser(exerciseSessionAdd.ExerciseId, userResult.User.Id);
 
             return CreatedAtRoute("GetExerciseSession",
                 new { Controller = "ExerciseSession", id = es.Id },
