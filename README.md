@@ -1,5 +1,6 @@
 # Exero.Api
-Api for logging workout sessions.
+Api for logging workout sessions.<br>
+Mostly for testing the technologies listen below.
 
 **Using**
 - ASP.NET Core 2.x
