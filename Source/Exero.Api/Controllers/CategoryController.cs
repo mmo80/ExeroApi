@@ -11,7 +11,7 @@ namespace Exero.Api.Controllers
 {
     [Authorize]
     [Produces("application/json")]
-    [Route("api")]
+    [Route("")]
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;

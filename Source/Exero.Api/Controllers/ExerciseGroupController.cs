@@ -11,7 +11,7 @@ namespace Exero.Api.Controllers
 {
     [Authorize]
     [Produces("application/json")]
-    [Route("api")]
+    [Route("")]
     public class ExerciseGroupController : Controller
     {
         private readonly IExerciseGroupRepository _exerciseGroupRepository;

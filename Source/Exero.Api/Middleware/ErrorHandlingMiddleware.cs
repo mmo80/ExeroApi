@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using NLog;
+using NLog.Web;
 
 namespace Exero.Api.Middleware
 {
@@ -13,9 +13,11 @@ namespace Exero.Api.Middleware
     public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate _next;
+        private static Logger _logger;
 
         public ErrorHandlingMiddleware(RequestDelegate next)
         {
+            _logger = LogManager.LoadConfiguration("nlog.config").GetCurrentClassLogger();
             _next = next;
         }
 
@@ -38,6 +40,8 @@ namespace Exero.Api.Middleware
             //if (exception is MyNotFoundException) code = HttpStatusCode.NotFound;
             //else if (exception is MyUnauthorizedException) code = HttpStatusCode.Unauthorized;
             //else if (exception is MyException) code = HttpStatusCode.BadRequest;
+
+            _logger.Error(exception);
 
 #if DEBUG
             var result = JsonConvert.SerializeObject(new { error = exception.ToString() });

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Common;
 using Exero.Api.Models;
@@ -18,7 +16,7 @@ namespace Exero.Api.Controllers
             _userRepository = userRepository;
         }
 
-        public async Task<UserResult> CheckUser()
+        protected async Task<UserResult> CheckUser()
         {
             var user = await _userRepository.ByEmail(ClaimsHelper.GetUserValue(User, Common.ValueType.email));
             return new UserResult(user);

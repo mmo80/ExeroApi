@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Exero.Api.Models;
@@ -11,7 +10,7 @@ namespace Exero.Api.Controllers
 {
     [Authorize]
     [Produces("application/json")]
-    [Route("api")]
+    [Route("")]
     public class ExerciseController : Controller
     {
         private readonly IExerciseRepository _exerciseRepository;

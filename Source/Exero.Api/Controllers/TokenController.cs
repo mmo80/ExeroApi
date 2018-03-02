@@ -5,22 +5,26 @@ using Exero.Api.Models;
 using Exero.Api.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RestSharp;
 
 namespace Exero.Api.Controllers
 {
     [Produces("application/json")]
-    [Route("api/token")]
+    [Route("token")]
     public class TokenController : Controller
     {
         private readonly Auth0 _auth0;
         private readonly IUserRepository _userRepository;
 
-        public TokenController(IOptions<ExeroSettings> settings, IUserRepository userRepository)
+        private readonly ILogger<TokenController> _logger;
+
+        public TokenController(IOptions<ExeroSettings> settings, IUserRepository userRepository, ILogger<TokenController> logger)
         {
             _auth0 = settings.Value.Auth0;
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         [HttpPost("login"), AllowAnonymous]
@@ -38,6 +42,19 @@ namespace Exero.Api.Controllers
             });
             var result = await GetResponse<TokenResultApi>(request);
 
+            _logger.LogDebug($@"Login with following values against auth0.com. 
+                Domain: {_auth0.Domain}, Audience: {_auth0.Audience}, ConnectionDb: '{_auth0.ConnectionDb}', ClientId: '{_auth0.ClientId}'.");
+
+            if (!result.IsSuccessful)
+            {
+                _logger.LogError($"Login against auth0 failed. Reason: {result.Content}.");
+                if (result.ErrorException != null)
+                {
+                    _logger.LogError(result.ErrorException, $"ErrorMessage: {result.ErrorMessage}.");
+                }
+                return Unauthorized();
+            }
+
             return Ok(result.Data);
         }
 
@@ -51,6 +68,16 @@ namespace Exero.Api.Controllers
                 email = forgottApi.Email
             });
             var result = await GetResponse<string>(request);
+
+            if (!result.IsSuccessful)
+            {
+                _logger.LogError($"ForgotPassword against auth0 failed. Reason: {result.Content}.");
+                if (result.ErrorException != null)
+                {
+                    _logger.LogError(result.ErrorException, $"ErrorMessage: {result.ErrorMessage}.");
+                }
+                return BadRequest("Failed to request new password.");
+            }
 
             return Ok(result.Content);
         }
@@ -74,10 +101,15 @@ namespace Exero.Api.Controllers
                 }
             });
             var result = await GetResponse<SignupResultApi>(request);
-            if (result.ErrorException != null)
+
+            if (!result.IsSuccessful)
             {
-                return BadRequest($"Auth0 responded: {result.Content}. {result.ErrorException}.");
-                //throw result.ErrorException;
+                _logger.LogError($"Register against auth0 failed. Reason: {result.Content}.");
+                if (result.ErrorException != null)
+                {
+                    _logger.LogError(result.ErrorException, $"ErrorMessage: {result.ErrorMessage}.");
+                }
+                return BadRequest("Failed to register.");
             }
             
             var user = new User
@@ -90,6 +122,7 @@ namespace Exero.Api.Controllers
             return Ok(result.Data);
         }
 
+        // TODO: Logout?
 
         private RestRequest GetRequest(string resource)
         {
@@ -103,8 +136,6 @@ namespace Exero.Api.Controllers
             var client = new RestClient($"https://{_auth0.Domain}/");
             return client.ExecuteTaskAsync<T>(request);
         }
-
-        // TODO: Logout?
     }
 
 

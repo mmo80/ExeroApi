@@ -7,13 +7,12 @@ using Exero.Api.Models;
 using Exero.Api.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ValueType = Exero.Api.Common.ValueType;
 
 namespace Exero.Api.Controllers
 {
     [Authorize]
     [Produces("application/json")]
-    [Route("api")]
+    [Route("")]
     public class ExerciseSessionController : BaseController
     {
         private readonly IExerciseSessionRepository _exerciseSessionRepository;

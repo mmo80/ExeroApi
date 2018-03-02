@@ -1,9 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Exero.Api.Middleware;
+﻿using Exero.Api.Middleware;
 using Exero.Api.Repositories;
-using Exero.Api.Repositories.Memory;
 using Exero.Api.Repositories.Neo4j;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;

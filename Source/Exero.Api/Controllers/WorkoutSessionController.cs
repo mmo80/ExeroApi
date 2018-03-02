@@ -12,7 +12,7 @@ namespace Exero.Api.Controllers
 {
     [Authorize]
     [Produces("application/json")]
-    [Route("api")]
+    [Route("")]
     public class WorkoutSessionController : BaseController
     {
         private readonly IWorkoutSessionRepository _workoutSessionRepository;
